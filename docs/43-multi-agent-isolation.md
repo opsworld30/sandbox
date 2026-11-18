@@ -223,3 +223,9 @@ Multi-Agent Sandbox 不只是：
 - 不能通过共享文件夹传递长期 Secret。
 
 Multi-Agent Isolation 的核心不只是“每个 Agent 一个容器”，而是控制数据流、能力委托和跨 Agent 信任关系。
+
+## 本讲实验代码
+
+- [Multi-Agent Workspace / Artifact Broker](../labs/13-multi-agent-workspaces/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
