@@ -36,11 +36,12 @@
 程序会：
 
 1. 初始化 libseccomp；
-2. 默认允许 syscall；
-3. 添加原生架构的 `mkdirat` syscall → EPERM 规则；
-4. 加载 filter；
-5. 通过 `syscall(SCMP_SYS(mkdirat), AT_FDCWD, ...)` 直接发起这个 syscall；
-6. 观察 Kernel 返回 EPERM。
+2. 显式启用 `no_new_privs`；
+3. 默认允许 syscall；
+4. 添加原生架构的 `mkdirat` syscall → EPERM 规则；
+5. 加载 filter；
+6. 通过 `syscall(SCMP_SYS(mkdirat), AT_FDCWD, ...)` 直接发起这个 syscall；
+7. 观察 Kernel 返回 EPERM。
 
 这里直接调用目标 syscall，而不是依赖 `mkdtemp()` 或 libc 包装函数；使用 `mkdirat` 也能避免不同架构的 libc 选择不同底层 syscall 所产生的歧义。
 
