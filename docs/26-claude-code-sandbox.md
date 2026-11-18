@@ -102,7 +102,7 @@ Native Windows 不提供 Claude Code 本地命令 Sandbox；Windows 用户需要
 
 ### Anthropic 独立的 sandbox-runtime 项目
 
-这是另一个开源工具，目标是对任意进程施加文件和网络限制：
+这是另一个开源工具，目标是对任意进程施加文件和网络限制。当前仓库整体标注为 Beta Research Preview；Windows 默认 `srt-win` 标注为 Alpha，另有实验性的 MXC Backend：
 
     macOS
       → sandbox-exec / Seatbelt profile
