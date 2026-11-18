@@ -78,11 +78,13 @@ Classifier：
 
     Decision Support
 
+Classifier 可以是规则、统计模型或 LLM；在 Cursor Auto-review 等产品里，它可能是模型辅助的风险判断。不要把所有产品的 Classifier 都假设成同一个模型。
+
 Sandbox：
 
     open("/home/user/.ssh/id_rsa")
        ↓
-    Kernel Policy
+    Kernel / OS Policy
        ↓
     EPERM
 
@@ -130,35 +132,37 @@ Sandbox：
 
 ## 7. Policy Precedence
 
-推荐：
+不同产品会有不同的策略合并规则。下面只是一个可用于自研 Runtime 的设计示例，不是行业统一标准：
 
-    System Policy
+    Mandatory System Guardrails
        >
-    Team Policy
+    Organization / Team Policy
        >
     Project Policy
        >
-    User Policy
+    User Preference
        >
     Agent Request
 
-注意：
+关键不是死记这个排序，而是定义清楚：
 
-    Agent Request
+- 哪些规则是不可覆盖的 mandatory deny；
+- 冲突时采用 deny-overrides 还是明确优先级；
+- 谁可以扩大权限；
+- Agent 是否能修改自己的策略（默认不可以）；
+- Policy 变更是否需要重新审批和记录版本。
 
-不能自己修改：
-
-    System Policy
-
-否则：
-
-    Agent:
-    “请把 ~/.ssh 加到 allowlist。”
-
-就能绕过整个安全模型。
+例如 Team 禁止访问 `~/.ssh`，Project 不应该通过普通 allow 规则覆盖它。
 
 ## 8. 面试题
 
 为什么需要 Permission 和 Sandbox 两层？
 
 因为 Permission 控制“是否执行”，Sandbox 控制“执行后能做什么”，二者是不同维度的安全控制。
+
+
+## 9. 还要区分“审批”和“扩大 Sandbox”
+
+用户批准一个命令，可能只代表允许执行该动作；也可能代表允许一次 Sandbox 外执行，或允许扩大某个 capability。UI 和 Runtime 必须明确告诉用户本次批准的范围、持续时间和是否移除 OS 限制。
+
+**安全原则：** 不要把“用户点了 Allow”自动等同于“永久关闭 Sandbox”。
