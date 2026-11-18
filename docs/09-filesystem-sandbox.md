@@ -286,3 +286,10 @@ Kernel 文档明确列出一些 Landlock 目前不能单独限制的文件相关
 如果 Runtime 使用 OverlayFS / overlay writable layer，必须针对 Agent 实际访问的 merged hierarchy 建立规则，并单独核对 upper / lower 层是否暴露给进程。不能只给 lower 或 upper 路径加规则，就推断 merged workspace 也已被限制。
 
 参考：https://docs.kernel.org/userspace-api/landlock.html
+
+## 本讲实验代码
+
+- [Landlock 文件系统隔离](../labs/02-landlock/README.md)
+- [bubblewrap Workspace 边界](../labs/04-bubblewrap/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
