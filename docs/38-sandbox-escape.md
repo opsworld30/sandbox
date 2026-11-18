@@ -241,3 +241,9 @@ Linux：
 - Kernel / VMM 漏洞和配置错误。
 
 一个安全测试只证明了特定版本、配置和平台下的行为，不代表所有 Kernel 和所有 Backend 都没有逃逸路径。
+
+
+## 参考
+
+- Linux Landlock：https://docs.kernel.org/userspace-api/landlock.html
+- Linux `openat2` path resolution：https://man7.org/linux/man-pages/man2/openat2.2.html
