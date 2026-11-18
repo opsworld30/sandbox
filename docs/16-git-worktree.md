@@ -179,3 +179,9 @@ Git Worktree 隔离的是多个工作目录的 checkout 状态，便于并行开
       = process / filesystem / network / credential boundary
 
 多 Agent 场景应当同时使用独立 worktree 和独立 Sandbox，并明确共享的 Git 元数据由谁写入。
+
+## 本讲实验代码
+
+- [Git Worktree 与 Snapshot](../labs/11-worktree-snapshot/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
