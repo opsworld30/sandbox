@@ -86,9 +86,13 @@ SSH 解决：
       ↓
     Scheduler
       ↓
-    Worker
+    Worker Host / VM
       ↓
-    Sandbox
+    Sandbox Runtime
+      ↓
+    workload process
+
+Worker Host 可以是 VM、物理机或集群节点；Container 是一种 workload packaging / isolation 方式；gVisor 是可作为容器运行时使用的用户态 Kernel sandbox（例如 runsc），MicroVM 则由 VMM / Hypervisor 启动。不要把 gVisor 直接写成 Worker Host 类型。
 
 Worker 可以：
 
@@ -244,3 +248,10 @@ Agent 产生：
 为什么 Remote Worker 还需要 Sandbox？
 
 因为 Worker 本身可能运行多个 Session；Remote Host 是共享基础设施，不能因为用了远程机器就认为代码天然隔离。
+
+
+## 13. Remote Execution 还需要明确的控制面边界
+
+Control Plane 管理 Session、Policy、调度和凭证发放；Data Plane 执行不可信代码。Sandbox 内的进程不应拿到 Control Plane 的主凭证，也不应直接访问 Scheduler、Metadata DB 或宿主机管理 Socket。
+
+Remote Worker 不是天然安全边界：同一 Worker Host 可能承载多个 Session，仍需要 cgroup / container / MicroVM / VM 隔离、网络策略和清理机制。
