@@ -115,7 +115,7 @@
 | 产品 | 当前公开资料中的实现 / 范围 |
 |---|---|
 | Codex | macOS Seatbelt；Linux / WSL2 bwrap；Windows Native Sandbox；Cloud 单独执行环境 |
-| Claude Code | 本地 Bash Sandbox：macOS Seatbelt、Linux / WSL2 bubblewrap + proxy；File tools / MCP / hooks 不自动包含在该 Bash Sandbox 内 |
+| Claude Code | 本地命令 Sandbox：macOS Seatbelt、Linux / WSL2 bubblewrap + proxy；Bash / PowerShell / Monitor 命令及子进程受限，File / Web tools、MCP、hooks、LSP、plugin monitors、helpers 和 Mods 不自动包含在边界内 |
 | Cursor | 本地 Shell Sandbox：macOS Seatbelt；Linux Landlock，bubblewrap fallback；Run Modes / Auto-review 是独立决策层 |
 | VS Code Copilot Harness | macOS Seatbelt；glibc Linux / WSL2 bubblewrap；Windows BaseContainer Experimental；Sandbox 默认 off，outbound network 默认 allow |
 | Gemini CLI | Seatbelt、Docker / Podman、Windows Native、gVisor / runsc、LXC / LXD Experimental |
@@ -127,7 +127,7 @@
 ### Lab 01：seccomp
 
 - 已做代码静态审查；
-- 将目标调用改为直接执行 `syscall(SCMP_SYS(mkdirat), AT_FDCWD, ...)`，避免 libc wrapper 可能选择不同 syscall 的歧义；
+- 将目标调用改为直接执行 `syscall(SCMP_SYS(mkdirat), AT_FDCWD, ...)`，避免不同架构的 libc wrapper 选择不同 syscall；显式启用 libseccomp 的 `SCMP_FLTATR_CTL_NNP`；
 - 当前审查环境没有安装 `libseccomp-dev` 头文件，因此本轮没有完成编译和运行验证；
 - 需要在安装了 libseccomp 开发包、Kernel 启用 seccomp filter 的 Linux 主机上运行，并验证 EPERM / audit 日志。
 
