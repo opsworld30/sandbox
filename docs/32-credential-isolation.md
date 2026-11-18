@@ -118,9 +118,11 @@ Agent 根本不知道真实 token。
       ↓
     privileged container control
 
-所以 Sandbox 要有：
+因此自研 Sandbox Policy 可以有类似：
 
     denyUnixSockets
+
+但这不是所有 OS / Backend 都提供的统一开关；实际需要通过 mount namespace、文件系统可见性、Socket ACL、代理架构或平台专属机制限制具体 Unix Socket。
 
 ## 7. Credential Broker 的 API
 
