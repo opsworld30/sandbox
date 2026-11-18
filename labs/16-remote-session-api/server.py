@@ -51,6 +51,9 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(400, {"error": "invalid_body_size"})
                 return
             body = json.loads(self.rfile.read(size))
+            if not isinstance(body, dict):
+                self.reply(400, {"error": "json_object_required"})
+                return
         except (ValueError, json.JSONDecodeError):
             self.reply(400, {"error": "invalid_json"})
             return
