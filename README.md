@@ -91,21 +91,25 @@ AI Agent 最终会执行：
 39. Resource Isolation：cgroups、rlimit、IO、fork bomb
 40. Network Proxy：HTTP CONNECT、DNS、Egress Gateway
 
-### 第八阶段：继续深入
+### 第八阶段：Runtime Architecture
 41. Tool Capability Model：Shell / MCP / Browser / LSP 分权
 42. Workspace Snapshot：Checkpoint、Rollback、Copy-on-write
 43. Multi-Agent Isolation：Agent-to-Agent 边界
 44. Remote Execution：SSH / Remote Host / Cloud Worker
+
+### 第九阶段：隔离技术深入
 45. MicroVM 深入：Firecracker、KVM、启动成本
 46. gVisor：用户态 Kernel 与 syscall interception
 47. WASI / WebAssembly Sandbox
 48. Windows Native Sandbox 深入
+
+### 第十阶段：生产化与安全验证
 49. Sandbox Observability：事件模型、Trace、Forensics
 50. Sandbox Benchmark：启动速度、吞吐、安全性、兼容性
 51. Escape Challenge：构建自己的 Sandbox CTF
 52. Production Architecture：多租户 AI Sandbox 平台
 
-> 目前已经从“认识 Sandbox”推进到“理解主流 AI Coding 产品的 Sandbox，再到 Policy / Escape / Resource / Network Runtime”。后续继续把它做成一套可以真正实现生产级 AI Agent Runtime 的课程。
+> 目前课程正文已经推进到第 44 讲：从 Sandbox 基础、Linux/macOS 原语，到 Codex / Claude Code / Cursor / VS Code / Gemini CLI 的设计，再到 Policy、Escape、Resource、Network、Capability、Snapshot、Multi-Agent、Remote Runtime。
 
 ## 主流 AI Coding 产品的学习地图
 
