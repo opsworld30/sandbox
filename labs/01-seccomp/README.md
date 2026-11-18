@@ -37,10 +37,12 @@
 
 1. 初始化 libseccomp；
 2. 默认允许 syscall；
-3. 添加 mkdir → EPERM 规则；
+3. 添加原生架构的 `mkdir` syscall → EPERM 规则；
 4. 加载 filter；
-5. 调用 mkdtemp；
-6. mkdir 最终失败。
+5. 通过 `syscall(SCMP_SYS(mkdir), ...)` 直接发起这个 syscall；
+6. 观察 Kernel 返回 EPERM。
+
+这里直接调用目标 syscall，而不是依赖 `mkdtemp()` 或 libc 包装函数，避免不同 libc 版本选择 `mkdir` / `mkdirat` 时产生歧义。
 
 ## 你要观察什么
 
