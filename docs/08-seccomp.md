@@ -421,13 +421,13 @@ https://docs.docker.com/engine/security/seccomp/
 它故意使用：
 
     default = ALLOW
-    mkdir = ERRNO(EPERM)
+    mkdirat = ERRNO(EPERM)
 
 原因是教学阶段我们只想观察一个明确的变化：
 
     普通程序
       ↓
-    mkdir
+    mkdirat
       ↓
     success
 
@@ -435,7 +435,7 @@ https://docs.docker.com/engine/security/seccomp/
 
     seccomp loaded
       ↓
-    mkdir
+    mkdirat
       ↓
     Kernel
       ↓
@@ -492,7 +492,7 @@ seccomp 可以检查 syscall 参数中的数值，但不能直接检查 `openat`
 
 本仓库 Lab 01 使用 `default = ALLOW`，仅拦截一个明确 syscall，让你观察 Kernel 返回 EPERM。它不是生产级 allowlist，也不是完整 Sandbox。
 
-更重要的是，示例通过 `syscall(SCMP_SYS(mkdir), ...)` 直接调用目标 syscall，避免 libc 包装函数可能选择 `mkdirat` 等实现路径导致实验结果不一致。
+更重要的是，示例通过 `syscall(SCMP_SYS(mkdirat), AT_FDCWD, ...)` 直接调用目标 syscall，避免不同架构或 libc 包装函数选择不同底层 syscall 导致实验结果不一致。
 
 ## 参考补充
 
