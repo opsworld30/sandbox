@@ -262,3 +262,10 @@ LSP 需要：
 ## 13. Remote MCP / Tool 的边界
 
 本机 Tool Sandbox 只限制本机执行进程。Remote MCP Server、Browser Service、Database API 的服务端仍需自己的身份认证、授权、网络和租户隔离。Tool Capability 应跨服务边界验证，而不能只在本地 UI 中声明一次。
+
+## 本讲实验代码
+
+- [Tool Capability Broker](../labs/15-tool-capabilities/README.md)
+- [MCP stdio Server](../labs/22-mcp-stdio/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
