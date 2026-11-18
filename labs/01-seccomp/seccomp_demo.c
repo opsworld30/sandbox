@@ -25,6 +25,12 @@ int main(void) {
      *
      * This is intentionally not a production sandbox profile.
      */
+    if (seccomp_attr_set(ctx, SCMP_FLTATR_CTL_NNP, 1) < 0) {
+        fprintf(stderr, "seccomp_attr_set(CTL_NNP) failed\n");
+        seccomp_release(ctx);
+        return 1;
+    }
+
     if (seccomp_rule_add(
             ctx,
             SCMP_ACT_ERRNO(EPERM),
@@ -54,7 +60,7 @@ int main(void) {
      */
     long rc = syscall(SCMP_SYS(mkdirat), AT_FDCWD, path, 0700);
     if (rc == -1) {
-        printf("mkdir syscall blocked as expected: errno=%d (%s)\n",
+        printf("mkdirat syscall blocked as expected: errno=%d (%s)\n",
                errno, strerror(errno));
     } else {
         printf("unexpected success: %s\n", path);
