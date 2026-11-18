@@ -37,6 +37,8 @@
 
 ## 3. 更合理的模型
 
+对权限不同、信任等级不同或需要并行执行不可信代码的 Agent，可以使用独立安全上下文：
+
     Agent A
       ↓
     Sandbox A
@@ -49,11 +51,9 @@
       ↓
     Sandbox C
 
-然后通过：
+然后通过受控 Message Bus / Artifact API 通信。
 
-    Message Bus
-
-进行通信。
+是否每个 Agent 都必须单独一个 Sandbox，取决于风险、资源和共享能力；关键是不能让低信任 Agent 无限制继承高权限 Agent 的文件、网络和凭证。
 
 ## 4. Agent 间通信也需要 Policy
 
@@ -207,3 +207,19 @@ Multi-Agent Sandbox 不只是：
     Capability Isolation
       +
     Artifact Boundary
+
+
+## 11. Agent Message 和 Artifact 也是不可信输入
+
+即使消息来自同一个系统里的另一个 Agent，也可能包含被 Prompt Injection 污染的内容。下游 Agent 应把它当作数据，而不是自动执行的指令。
+
+跨 Agent 共享建议使用：
+
+- schema validation；
+- artifact type / size / path allowlist；
+- content hash / provenance；
+- explicit publish / consume API；
+- 独立权限和审计；
+- 不能通过共享文件夹传递长期 Secret。
+
+Multi-Agent Isolation 的核心不只是“每个 Agent 一个容器”，而是控制数据流、能力委托和跨 Agent 信任关系。
