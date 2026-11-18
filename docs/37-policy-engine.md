@@ -150,28 +150,27 @@ Policy 是：
 
 ## 6. Policy Precedence
 
-推荐：
+不同系统的策略合并方式不同。一个自研 Runtime 可以采用：
 
-    Hard Safety
+    Mandatory Guardrails
         >
-    System
-        >
-    Team
+    Organization / Team
         >
     Project
         >
-    User
+    User Preference
         >
     Session Request
 
-不能反过来。
+这只是设计建议，不是行业标准。必须明确 mandatory deny 是否可被任何下层规则覆盖、同级冲突如何处理，以及扩权是否需要审批。
 
-否则 Agent 可以：
+Agent Request 不应该拥有修改自身安全边界的能力。否则 Agent 可以提交：
 
-    Session Request:
-      allow /etc
+    allow /etc
+    allow ~/.ssh
+    network = *
 
-把系统策略覆盖。
+从而绕过原本的策略模型。
 
 ## 7. Decision 类型
 
@@ -288,3 +287,35 @@ Enforcement 是：
 为什么 Policy Engine 和 Sandbox Backend 应该分开？
 
 因为 Policy 描述安全意图，而 Backend 负责在不同平台上实现这个意图。这样可以实现跨平台 Runtime，同时避免 Agent 与具体 OS 原语耦合。
+
+
+## 13. Policy Compiler 必须支持能力协商和 fail-closed
+
+不是每个 Backend 都能表达每一种 Policy：
+
+- seccomp 不能按路径字符串做文件授权；
+- Landlock 的网络规则不是 FQDN 白名单；
+- bubblewrap 的 namespace / mount 参数不能独立完成任意域名 Egress Policy；
+- 某些平台没有和 Linux cgroup 完全等价的资源控制接口。
+
+因此编译过程必须输出：
+
+    Supported
+    Unsupported
+    Degraded (explicitly approved)
+
+如果关键安全要求无法 enforce，默认应拒绝启动，而不是静默丢弃规则后仍返回“Sandbox ready”。
+
+## 14. Policy Test
+
+每个 Backend 应有一套 conformance test：
+
+    policy says deny
+       ↓
+    actual operation attempted
+       ↓
+    OS / Proxy blocks
+       ↓
+    test verifies denial
+
+只验证 JSON 合并结果，不代表策略已经在操作系统中生效。
