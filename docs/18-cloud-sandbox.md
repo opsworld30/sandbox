@@ -48,53 +48,46 @@
 
 ## 3. Harness 和 Environment
 
-现代 Agent Runtime 一个很重要的抽象：
+现代 Agent Runtime 一个重要的架构抽象是把 Agent 会话和执行环境分开：
 
-    Harness
-      ↓
-    Agent loop
-    Tool calling
-    Session
+    Agent Session
+      - agent configuration
+      - conversation / turn state
+      - tool routing
 
-    Environment
-      ↓
-    CPU
-    Memory
-    Files
-    Processes
-    Network
+    Execution Environment
+      - CPU / Memory
+      - workspace / files
+      - processes
+      - network policy
 
 也就是说：
 
-> 模型运行逻辑不一定和代码执行环境在同一台机器。
+> 模型推理、Agent 编排和代码执行不一定发生在同一台机器。
 
-OpenAI 当前 Agents API 就明确把 Harness 与 Environment 分开，Environment 可以是远程 Sandbox、本地机器、Container 等。
+以 OpenAI Agents API 为例，公开接口把 Session 与 Environment 分开建模，Environment 可以选择 OpenAI-hosted sandbox 或 self-hosted sandbox。注意这是 API 的对象模型，不应把它误写成所有产品都使用同一种 Harness 内部实现。
 
 ## 4. Cloud Session
 
-典型生命周期：
+一种常见的生命周期设计：
 
-    create session
+    create environment
        ↓
     provision sandbox
        ↓
-    clone workspace
+    prepare workspace
+       ↓
+    attach / create Agent Session
        ↓
     agent work
        ↓
-    snapshot
+    persist required artifacts
        ↓
     suspend / destroy
 
-用户回来：
+是否支持 snapshot、resume、memory restore，取决于具体平台。不要把“Session 可继续”直接等同于“底层 VM 内存快照恢复”。
 
-    resume
-       ↓
-    restore snapshot
-       ↓
-    continue
-
-GitHub Copilot 的 Cloud Sandbox 也采用类似 Session 与远程环境分离的思路。
+其他产品也会提供远程执行会话，但不同产品的“Cloud Session”“Cloud Agent”“Sandbox”概念和隔离边界并不完全相同。应按各自官方文档区分，不能只凭名称推断内部实现。
 
 ## 5. Cloud Sandbox 为什么不能只看 Container
 
@@ -195,3 +188,15 @@ Self-hosted：
 ### Q：为什么还需要 MicroVM？
 
 当 Container 的共享 Kernel 风险和多租户安全要求不能接受时，需要更强的 Kernel / VM 边界。
+
+
+## 11. OpenAI Hosted Sandbox 的事实边界
+
+截至 2026-11-18，OpenAI Agents API 的 OpenAI-hosted sandbox 文档描述的是一个 Linux workspace，采用 container 资源规格（small / medium / large），每个 Session 有独立 workspace，文件在 Sandbox 存续期间跨 turns 保留；还可以设置 network access（enabled / disabled / restricted）。
+
+这属于 Agents API 的 OpenAI-hosted sandbox，不能和 Codex Cloud 的所有内部实现简单画等号。产品、API 和不同执行面需要分开描述。
+
+参考：
+- OpenAI-hosted sandboxes：https://developers.openai.com/api/docs/guides/agents-api/environments/openai-hosted
+- Self-hosted sandboxes：https://developers.openai.com/api/docs/guides/agents-api/environments/self-hosted
+- Sandbox lifecycle：https://developers.openai.com/api/docs/guides/agents-api/environments/lifecycle
