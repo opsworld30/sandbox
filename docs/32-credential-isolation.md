@@ -98,9 +98,9 @@ Agent 根本不知道真实 token。
       ↓
     SSH Agent
       ↓
-    sign arbitrary challenge
+    request signature with loaded key
 
-它可能获得比你预期更大的能力。
+它可能获得比你预期更大的能力。实际可签名范围取决于 Key 的确认要求、有效期和 destination constraints；Socket 本身仍然是一种能力入口。
 
 因此：
 
