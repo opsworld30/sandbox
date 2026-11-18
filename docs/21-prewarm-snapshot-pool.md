@@ -209,3 +209,15 @@ Prewarm 是提前准备一个将要使用的环境；Snapshot 是保存某个环
 - 新 Session 使用新的身份、policy version 和 audit context。
 
 如果不能证明 reset 完整，就销毁实例而不是放回共享 Pool。
+
+
+## 13. OpenAI Pre-warmed Environment 的共享语义
+
+OpenAI Agents API 当前提供两种需要区分的情况：
+
+- 普通 OpenAI-hosted Session：每个 Session 有独立 workspace，文件在 Sandbox 存续期间跨 turns 保留。
+- 通过 Pre-warm API 单独创建的共享 Environment：可以附加多个 Session；当前文档说明新建共享 Environment 最多支持 128 个 Session，附加的 Session 会共享同一工作区，包括文件、进程、已安装包和环境配置，而每个 Session 的对话历史仍独立。
+
+因此，共享 Pre-warmed Environment 不是“每个 Session 自动得到一份隔离副本”。如果任务之间不能互相读取或修改状态，应分别创建 Environment，而不是只创建多个 Session。
+
+参考：https://developers.openai.com/api/docs/guides/agents-api/environments/prewarmed
