@@ -46,18 +46,62 @@ static int landlock_restrict_self(int ruleset_fd) {
 
 int main(void) {
     /*
-     * This demo intentionally handles only a small set of filesystem
-     * permissions. It is for learning, not production isolation.
+     * This is a teaching demo, not a production policy.
+     * Landlock only denies access rights listed in handled_access_fs.
+     * Rights omitted here remain governed by the ordinary OS permissions.
      */
-    const __u64 handled =
+    int abi = landlock_create_ruleset(
+        NULL,
+        0,
+        LANDLOCK_CREATE_RULESET_VERSION
+    );
+
+    if (abi < 1) {
+        if (abi < 0) {
+            perror("Landlock is unavailable or disabled");
+        } else {
+            fprintf(stderr, "Landlock ABI is too old: %d\n", abi);
+        }
+        return 1;
+    }
+
+    __u64 handled =
         LANDLOCK_ACCESS_FS_EXECUTE |
         LANDLOCK_ACCESS_FS_READ_FILE |
         LANDLOCK_ACCESS_FS_WRITE_FILE |
         LANDLOCK_ACCESS_FS_READ_DIR |
         LANDLOCK_ACCESS_FS_REMOVE_DIR |
         LANDLOCK_ACCESS_FS_REMOVE_FILE |
+        LANDLOCK_ACCESS_FS_MAKE_CHAR |
+        LANDLOCK_ACCESS_FS_MAKE_DIR |
         LANDLOCK_ACCESS_FS_MAKE_REG |
-        LANDLOCK_ACCESS_FS_MAKE_DIR;
+        LANDLOCK_ACCESS_FS_MAKE_SOCK |
+        LANDLOCK_ACCESS_FS_MAKE_FIFO |
+        LANDLOCK_ACCESS_FS_MAKE_BLOCK |
+        LANDLOCK_ACCESS_FS_MAKE_SYM;
+
+#ifdef LANDLOCK_ACCESS_FS_REFER
+    if (abi >= 2) {
+        handled |= LANDLOCK_ACCESS_FS_REFER;
+    }
+#endif
+#ifdef LANDLOCK_ACCESS_FS_TRUNCATE
+    if (abi >= 3) {
+        handled |= LANDLOCK_ACCESS_FS_TRUNCATE;
+    }
+#endif
+#ifdef LANDLOCK_ACCESS_FS_IOCTL_DEV
+    if (abi >= 5) {
+        handled |= LANDLOCK_ACCESS_FS_IOCTL_DEV;
+    }
+#endif
+#ifdef LANDLOCK_ACCESS_FS_RESOLVE_UNIX
+    if (abi >= 6) {
+        handled |= LANDLOCK_ACCESS_FS_RESOLVE_UNIX;
+    }
+#endif
+
+    printf("Detected Landlock ABI: %d\n", abi);
 
     struct landlock_ruleset_attr ruleset_attr = {
         .handled_access_fs = handled,
@@ -102,6 +146,10 @@ int main(void) {
     }
 
     /*
+     * This demo is single-threaded. landlock_restrict_self() restricts
+     * the calling thread and its future children; it does not retroactively
+     * confine unrelated threads that already existed.
+     *
      * An unprivileged process normally uses no_new_privs before
      * restricting itself with Landlock.
      */
@@ -157,7 +205,7 @@ int main(void) {
      */
     int created_fd = open(
         "workspace/created.txt",
-        O_CREAT | O_WRONLY | O_TRUNC,
+        O_CREAT | O_WRONLY,
         0600
     );
 
