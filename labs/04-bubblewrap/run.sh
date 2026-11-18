@@ -24,7 +24,7 @@ args=(
   --unshare-net
   --ro-bind /usr /usr
   --ro-bind /bin /bin
-  --ro-bind /etc /etc
+  --dir /etc
   --proc /proc
   --dev /dev
   --tmpfs /tmp
@@ -52,9 +52,7 @@ if [[ "$MODE" == "--check" ]]; then
       echo "unexpected host secret visibility" >&2
       exit 10
     fi
-    if [ -e /etc/shadow ]; then
-      echo "note: /etc is mounted read-only; shadow may be visible to root" >&2
-    fi
+    echo "/etc is an empty sandbox directory in this minimal profile"
     echo "network namespace:"
     readlink /proc/self/ns/net
     echo "sandbox check complete"
