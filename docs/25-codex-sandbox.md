@@ -231,7 +231,6 @@ Agent：
     ├───────────────┤
     │ Linux / WSL2  │
     │ bubblewrap    │
-    │ + seccomp*    │
     ├───────────────┤
     │ Windows       │
     │ native        │
@@ -294,3 +293,10 @@ https://openai.com/index/building-codex-windows-sandbox/
 
 1. Permission / Approval 和 Sandbox 是两层控制。批准某次操作，不等于 Sandbox 已自动扩大；是否允许在 Sandbox 外执行，取决于当前模式、规则和用户审批。
 2. 不同 Codex surface（CLI、IDE、Desktop、Cloud、Agents API）不是同一套部署环境。讨论实现时必须先说清楚具体是哪一个产品面和执行位置。
+
+
+## 13. Codex Linux 兼容性不是“安装 bwrap 就一定能启动”
+
+当前官方文档指出，Codex 需要能够创建所需的 unprivileged user namespace。某些 Linux 发行版（例如特定 Ubuntu AppArmor 配置）会限制这一能力。遇到启动警告时，应先按官方说明配置 bwrap / AppArmor，而不是直接关闭系统的 user namespace 安全限制。
+
+此外，Codex 的 Sandbox 适用于 Agent 启动的命令及其子进程；不要把它理解为系统上所有由 IDE 或其他服务独立启动的进程都会自动受限。
