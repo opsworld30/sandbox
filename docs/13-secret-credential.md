@@ -216,20 +216,6 @@ https://www.anthropic.com/research/claude-code-sandboxing
 OpenAI sandbox security:
 https://developers.openai.com/api/docs/guides/agents-api/environments/security
 
-
-## 12. SSH Agent 与 Unix Socket 也是 Credential
-
-`SSH_AUTH_SOCK` 不一定暴露私钥文件，但允许进程向 SSH Agent 请求签名。它本身就是一种被委托的身份能力；如果 Sandbox 能访问该 socket，Agent 可能以你的身份完成认证操作。
-
-同样，`/var/run/docker.sock`、云凭证代理 socket、数据库 socket 都可能把高权限能力带进 Sandbox。应按 Capability 设计是否允许访问，而不是只检查有没有密钥文件。
-
-## 13. 参考资料补充
-
-Claude Code 本地 Sandbox 的 credential masking / proxy 行为：https://code.claude.com/docs/en/sandboxing
-Anthropic sandbox-runtime：https://github.com/anthropics/sandbox-runtime
-OpenAI Agents API Sandbox Security：https://developers.openai.com/api/docs/guides/agents-api/environments/security
-
-
 ## 12. SSH Agent 与 Unix Socket 也是 Credential
 
 `SSH_AUTH_SOCK` 不一定暴露私钥文件，但允许进程向 SSH Agent 请求签名。它本身就是一种被委托的身份能力；如果 Sandbox 能访问该 socket，Agent 可能以你的身份完成认证操作。
