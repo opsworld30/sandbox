@@ -255,3 +255,9 @@ Anthropic sandbox-runtime 的 Windows Alpha `srt-win` Backend 文档明确列出
 ## 15. 网络能力要按协议核对
 
 Anthropic sandbox-runtime 的网络代理路径包括 HTTP / HTTPS Proxy，以及通过 SOCKS5 Proxy 中介的其他 TCP 流量。不要只因为配置了 hostname allowlist，就假设所有 UDP、QUIC、任意协议或远程服务流量都能被同一套 Proxy 规则检查；应按具体 Backend 和协议做实际测试。
+
+## 本讲实验代码
+
+- [Windows Sandbox VM](../labs/20-windows-sandbox/README.md)
+
+这些是对应主题的可运行教学实验或产品设计复现；并非厂商内部实现的源码副本。
