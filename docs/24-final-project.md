@@ -59,7 +59,9 @@
 
 提供：
 
-    exec(argv, cwd, timeout)
+    exec(argv, cwd, timeout, output_limit)
+
+请求必须使用 argv 数组，不要把不可信输入拼接成 shell 字符串。若确实需要 shell，应把 shell 本身视为被执行程序，并由 Sandbox 限制它及其后代进程。
 
 返回：
 
@@ -67,6 +69,8 @@
     stderr
     exit_code
     duration
+    timed_out
+    output_truncated
 
 ### 5. File Service
 
@@ -85,17 +89,23 @@
     allowedDomains
     allowLocalNetwork
 
+注意：`allowedDomains` 必须由强制 Egress Proxy / DNS + Firewall 等网络层机制执行；仅设置 HTTP_PROXY 环境变量不够，因为程序可以直接创建 socket。
+
 ### 7. Audit
 
 记录：
 
     session
     tool
-    command
+    argv_hash / redacted_argv
     decision
     duration
     exit_code
     policy_version
+    backend
+    enforcement_status
+
+不要把完整环境变量、Token、密码或可能包含 Secret 的命令参数原样写入日志。
 
 ## 4. API 设计
 
@@ -332,3 +342,35 @@ Agent 不可以：
     Container / MicroVM / VM
 
 这就是完整的 AI Sandbox 知识体系。
+
+
+## 13. 关键安全要求补充
+
+### API 安全
+
+- 每个 Session API 都必须做认证和对象级授权；
+- Session ID 不是授权凭证；
+- Exec 请求不能允许调用方覆盖宿主机路径或 Backend 内部参数；
+- 文件操作不能只靠字符串检查；
+- 错误响应不要泄露宿主机绝对路径、环境变量或 Secret。
+
+### 资源 enforcement
+
+- Linux CPU / Memory / PIDs：使用 cgroup v2 等 OS 资源控制；
+- 磁盘容量：使用文件系统 quota / 独立受限 volume；cgroup `io` 主要控制 I/O 资源，不等同磁盘空间配额；
+- stdout / stderr：在流式收集时计数并截断或终止，不能先完整缓存在内存再检查；
+- timeout / destroy：终止整个 Session 进程集合，而不是只 kill 父 PID。
+
+### Fail-closed
+
+如果关键隔离初始化失败，例如无法创建所需 namespace、加载 seccomp、设置网络出口规则或资源限制：
+
+    sandbox setup failed
+        ↓
+    do not execute
+
+不要自动回退到宿主机无隔离执行。若产品提供 Sandbox 外执行，必须作为独立审批动作，清楚显示风险并记录审计。
+
+## 14. 本项目不应宣称的内容
+
+完成这个 Mini Runtime 不代表已经实现生产级多租户安全。至少还需要独立的安全评估、逃逸测试、Kernel / VMM 攻击面审查、镜像供应链验证、并发和租户隔离测试，以及持续补丁管理。
