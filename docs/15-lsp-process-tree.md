@@ -94,17 +94,14 @@ Language Server 可能：
 
 > child process 是否自动继承父进程的 Sandbox？
 
-OS-level sandbox 的价值就在这里。
+答案取决于具体 OS 机制和启动路径，不能只凭“它是 child”就下结论。
 
-例如：
+- Linux seccomp filter 会随 fork / clone / exec 继承；Landlock domain 也会限制调用线程及其未来子进程。
+- Namespace 成员关系通常由子进程继承。
+- macOS Seatbelt 受限进程启动的子进程通常继续处于相应约束中。
+- 但由 IDE、Agent Host、MCP 管理器或其他独立服务启动的进程，可能不是这个进程树的一部分。
 
-    sandboxed bash
-       ↓
-    python
-       ↓
-    node
-
-只要 OS policy 作用于整个进程树，就不需要为每个语言 runtime 单独写一套安全系统。
+所以必须确认实际进程是从哪个 Host 启动的，以及该 Host 是否显式把它放入 Sandbox。
 
 ## 6. 为什么这比 Tool Blacklist 好
 
@@ -158,3 +155,12 @@ OS-level sandbox 的价值就在这里。
 ### Q：为什么 LSP 也需要 Sandbox？
 
 因为它本身会访问文件、依赖和系统资源，是 Agent Runtime 的一部分，而不是“纯文本服务”。
+
+
+## 9. Process Tree 不等于只记录 parent PID
+
+仅保存 root PID 后递归查找子 PID，再逐个 kill，可能遇到进程退出、PID 重用、子进程重新建立 session 或脱离进程组等竞态。
+
+生产系统应优先使用可对整个 Session 生效的 OS 资源边界，例如 Linux cgroup v2 的进程集合，或 Windows Job Object。销毁时先终止该边界，再验证其中没有残留进程。
+
+PTY 只是终端交互设备，不是进程隔离机制；PTY helper、shell 和其子进程必须处在同一 Sandbox 边界中。
