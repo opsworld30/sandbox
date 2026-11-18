@@ -107,7 +107,9 @@ Agent 看到的不是：
 
     Authorization: real-token
 
-而是一个受控的 placeholder / scoped credential。
+而是一个受控的 placeholder，或者只接触一个不返回底层凭证的 Tool API。
+
+**重要：** 普通 HTTPS CONNECT Proxy 只建立加密隧道，无法直接读取或改写 TLS 内部的 Authorization Header。要在 HTTPS 请求中替换凭证，需要受控 TLS interception（例如安装并信任专用 CA）、工具专用 Credential Helper，或由 Broker 直接代为执行 API / Git 操作。不能把“设置了 HTTPS_PROXY”当成自动完成了凭证注入。
 
 现代 Agent Sandbox 已经开始使用类似的 Credential Proxy 思路。
 
