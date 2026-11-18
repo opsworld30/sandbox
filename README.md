@@ -135,15 +135,17 @@ AI Agent 最终会执行：
       └── Native Windows → use WSL2 / container
 
     Scope:
-      File tools / MCP / hooks are not automatically
-      covered by the Bash Sandbox.
+      Bash / PowerShell / Monitor commands and child processes
+      are sandboxed; File / Web tools, MCP, hooks, LSP,
+      plugin monitors, helpers and Mods are outside by default.
 
     Cloud Session:
       isolated VM per Anthropic-hosted session
       + server-side GitHub / credential proxy
 
     Independent sandbox-runtime:
-      separate project; Windows support is Alpha.
+      separate project; Windows support is Alpha
+      (default srt-win + optional MXC BaseContainer backend).
 
 ### Cursor
 
