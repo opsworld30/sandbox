@@ -193,3 +193,9 @@ Runtime-neutral API 也不代表每个 Backend 的能力完全相同。Volume、
 - Quick Start：https://github.com/opensandbox-group/OpenSandbox/blob/main/docs/getting-started/index.md
 
 **版本提示：** OpenSandbox 的 runtime provider、FastSandbox / MicroVM 集成和各语言 SDK 的能力会变化。部署前必须以仓库当前版本的架构文档、配置和 SDK capability matrix 为准。
+
+## 本讲实验代码
+
+- [Control Plane / Worker Session API](../labs/16-remote-session-api/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
