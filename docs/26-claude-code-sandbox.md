@@ -338,3 +338,10 @@ Claude Code 官方文档指出，Sandboxed command 默认继承 Claude Code 的�
 Claude Code on the web 的网络控制和本地命令 Sandbox 是不同配置面。Anthropic-hosted Cloud Session 默认使用受限网络访问；可访问的服务、依赖安装能力和 GitHub Proxy 行为由 Cloud Session 的网络设置决定。即使关闭一般网络，Session 仍可与 Anthropic API 通信，因此“关闭外网”不等于“没有任何数据离开 VM”。不要把本地 Sandbox 的 `allowedDomains` 配置直接套用到 Cloud Session，也不要假设 GitHub 代理凭证会进入 VM。
 
 参考：https://code.claude.com/docs/en/claude-code-on-the-web
+
+## 本讲实验代码
+
+- [macOS Seatbelt](../labs/05-macos-seatbelt/README.md)
+- [Credential Broker](../labs/07-credential-broker/README.md)
+
+这些是对应主题的可运行教学实验或产品设计复现；并非厂商内部实现的源码副本。
