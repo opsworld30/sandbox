@@ -195,3 +195,10 @@ Browser Tool 与 Shell Tool 可能使用不同网络路径。即使 Shell Sandbo
 - 重定向后的目标；
 - DNS 解析后 IP；
 - 下载和上传路径。
+
+## 本讲实验代码
+
+- [Network Egress Policy](../labs/06-network-policy/README.md)
+- [Browser Tool Capability](../labs/15-tool-capabilities/README.md)
+
+这些是对应主题的可运行教学实验；实际 OS 隔离能力和模拟策略的区别以各 Lab README 为准。
