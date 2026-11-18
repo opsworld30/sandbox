@@ -115,3 +115,18 @@
 subprocess 能不能作为 Sandbox？
 
 不能。它是进程创建接口，不会自动限制文件、网络、syscall、设备和资源。
+
+
+## 安全边界补充：subprocess timeout 不等于清理整棵进程树
+
+例如 Python：
+
+```python
+subprocess.run(["bash", "-c", "sleep 300 & wait"], timeout=5)
+```
+
+超时处理针对的是 Python 创建并等待的那个直接子进程。若 shell 又启动了子进程，不能假设它们一定全部被清理；尤其是子进程脱离进程组、重新建立 session 或被 daemonize 时。
+
+教学实验可用 process group 做基础清理；Linux 生产环境优先考虑把 Session 的所有进程放进独立 cgroup，并在销毁时终止整个 cgroup。Windows 可研究 Job Objects。单独记录 PID 再逐个 kill 容易遇到 PID 重用和竞态。
+
+**结论：** `timeout` 是执行接口的超时语义，不是完整的进程隔离和资源回收方案。
