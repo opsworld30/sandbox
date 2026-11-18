@@ -181,3 +181,11 @@ Landlock ABI / access rights：https://www.kernel.org/doc/html/latest/userspace-
 ## 参考补充
 
 Landlock ABI / access rights：https://www.kernel.org/doc/html/latest/userspace-api/landlock.html
+
+
+Landlock 还有两个经常被漏掉的边界：
+
+- 文件系统访问权限并未覆盖所有文件相关 syscall；例如 `stat`、`chmod`、`chown`、`flock`、`setxattr` 等行为不能简单认为都被 Landlock 路径规则限制。
+- Landlock 规则对 bind mount 与 OverlayFS 的路径层次有不同语义；bind mount 会传播相关路径限制，但 OverlayFS 的 lower / upper / merged hierarchy 需要分别理解，不能只在一个路径上加规则就推断其他 OverlayFS 视图也受限。
+
+参考：https://www.kernel.org/doc/html/latest/userspace-api/landlock.html
