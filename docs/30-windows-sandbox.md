@@ -37,29 +37,17 @@ Linux 有：
 
 OpenAI 在 Codex Windows Sandbox 的公开文章中详细讨论了这个问题。
 
-## 3. 为什么 AppContainer 不够
+## 3. 为什么 Codex 没有直接把 AppContainer 当成完整答案
 
-AppContainer 很适合：
+AppContainer 是 Windows 正式的应用隔离机制，也可以运行任意可执行代码；不能说它“不能 Sandbox 任意程序”。
 
-    “我知道这个应用需要哪些能力”
+Codex 面临的具体问题是：开发工具链动态、开放、需要访问用户指定的 Workspace，还会启动 shell、Git、Python、Node、编译器和其他子进程。AppContainer 的身份、Capability、文件 ACL 和网络配置模型并不是一个可以无成本套用到所有本地开发工具的现成答案。
 
-但 Coding Agent 的特点是：
+因此更准确的说法是：
 
-    shell
-    git
-    python
-    node
-    npm
-    powershell
-    arbitrary binaries
+> AppContainer 是一种可选机制，但 Codex 选择了更适合其本地开发工作流的 restricted-token + 专用身份 + ACL + Firewall 组合。
 
-它不是一个固定能力集合。
-
-所以：
-
-> Coding Agent 是开放式程序执行器。
-
-这使得传统应用 Sandbox 的能力模型不一定直接适用。
+这不是说 AppContainer 本身不安全，也不是说其他产品不能使用它。
 
 ## 4. Windows ACL 的问题
 
@@ -75,21 +63,22 @@ AppContainer 很适合：
     C:\Users\...
       deny
 
-但如果每次 Sandbox policy 变化都需要修改大量 ACL：
+但如果运行时频繁创建和清理 ACL：
 
-    create ACL
+    prepare ACL
       ↓
     run
       ↓
     cleanup ACL
 
-就会产生：
+就会增加：
 
 - 性能成本；
-- 复杂性；
-- race condition；
-- 清理失败；
-- 系统状态污染。
+- 配置和清理复杂度；
+- 权限变更窗口；
+- 清理失败后遗留的系统状态。
+
+这不是说 ACL 本身必然存在 race condition，而是动态修改宿主机 ACL 时必须设计好并发、原子性、回滚和失败恢复。
 
 ## 5. Network 更难
 
@@ -240,3 +229,10 @@ https://openai.com/index/building-codex-windows-sandbox/
 - AppContainer、Windows Sandbox VM、BaseContainer、产品自定义 Sandbox 的隔离层次和兼容性不同。
 
 每个实现都应该有明确的 Threat Model、策略验证和 Escape Test；不能因为名称里有 Sandbox 就假设它阻止了所有宿主机访问。
+
+
+## 13. WFP 的边界不能被忽略
+
+Anthropic sandbox-runtime 的 Windows Alpha 文档明确列出 WFP 方案的限制：过滤器以专用 Sandbox 用户的 SID 为条件，若受限进程在创建 Socket 前把另一个 Token 应用到线程，或由系统服务代为发起网络流量，过滤器未必能按预期跟踪该动作。
+
+因此 WFP 过滤器不是“所有网络都无条件封死”的魔法开关。需要把 Token 变更、服务代发流量、Loopback Proxy、进程树和实际 Socket 创建身份纳入测试。
