@@ -85,7 +85,7 @@ Claude Code 的公开设计把两个边界放在一起：
 
 ### Claude Code 本地命令 Sandbox（产品行为）
 
-截至 2026-11-18，Claude Code 官方文档描述的本地 Bash Sandbox 平台路径为：
+截至 2026-11-18，Claude Code 官方文档描述的本地命令 Sandbox 平台路径为：
 
     macOS
       → Seatbelt
@@ -242,9 +242,9 @@ Proxy 检查：
 
 ## 10. 这一讲的核心
 
-Claude Code 本地 Bash Sandbox 展示的是：
+Claude Code 本地命令 Sandbox 展示的是：
 
-    Bash process tree
+    sandboxed command process tree
       +
     Filesystem isolation
       +
@@ -301,7 +301,8 @@ Proxy 默认不终止或检查 TLS 流量，因此通常只能按请求的 hostn
 - 命令在 Sandbox 内失败后，Claude 可能申请使用 `dangerouslyDisableSandbox` 在 Sandbox 外重试；
 - 可以设置 `sandbox.failIfUnavailable = true`，在 Sandbox 无法启动时拒绝启动 / 执行；
 - 可以设置 `sandbox.allowUnsandboxedCommands = false`，关闭 Sandbox 外重试；
-- `excludedCommands` 和用户自己在 shell-mode 输入的命令也需要单独审查。
+- `excludedCommands` 会让匹配的命令在 Sandbox 外运行；
+- 用户在 `!` shell-mode 提示符里自己输入的命令，在大多数会话中也会在 Sandbox 外运行；若要限制这类命令，需要检查 Strict sandbox mode。
 
 严格部署通常要同时考虑：
 
