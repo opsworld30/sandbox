@@ -196,7 +196,7 @@ Windows Native Sandbox 使用 Low Mandatory Level（MIC），并用 `icacls` 设
 
 ### Anthropic sandbox-runtime
 
-独立的 `@anthropic-ai/sandbox-runtime` Windows 支持目前标注为 Alpha。默认 `srt-win` Backend 使用专用 `srt-sandbox` 本地用户、Windows Filtering Platform（WFP）出站过滤、write-restricted token、Job Object 和文件系统 ACE。
+独立的 `@anthropic-ai/sandbox-runtime` 仓库整体标注为 Beta Research Preview；其中 Windows 默认 `srt-win` Backend 标注为 Alpha， 使用专用 `srt-sandbox` 本地用户、Windows Filtering Platform（WFP）出站过滤、write-restricted token、Job Object 和文件系统 ACE。
 
 当前项目还提供可选的 **实验性** `mxc` Backend：在支持的 Windows BaseContainer 环境中通过 `@microsoft/mxc-sdk` 执行，不使用 `srt-sandbox` 用户和 ACL 安装流程。它需要 Node.js 24+ 与可用的 MXC SDK；MXC 的 AppContainer tiers 不在此 Backend 使用。若 Host 不支持所需策略，会返回 `backend_unsupported`，不会自动回退到 `srt-win`。两种 Backend 不能混为一谈。
 
