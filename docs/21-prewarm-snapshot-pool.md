@@ -44,17 +44,17 @@ OpenAI 当前公开的 Pre-warm Sandbox 就是这个思路：先准备环境、�
 
 ## 3. Snapshot
 
-另一种思路：
+Snapshot 是把某个时间点的环境状态保存下来，之后恢复或从它创建新的实例。
 
-    Base Environment
+    Prepared Environment
        ↓
     Snapshot
        ↓
+    Restore / Clone
+       ↓
     New Sandbox
 
-可以避免每次重新：
-
-    install dependency
+Snapshot 的粒度依实现而不同：可能只是磁盘 / 文件系统状态，也可能是 VM 的内存和磁盘状态。不能默认所有产品的 Snapshot 都保存了进程内存、网络连接和完整 Session 状态。
 
 ## 4. Copy-on-write
 
@@ -147,21 +147,17 @@ Snapshot 可能包含：
 
 ## 8. Environment 和 Session
 
-一个很好的抽象：
+一个有用的抽象：
 
     Environment
       ↓
-    workspace + dependencies
+    image + workspace + dependencies + execution policy
 
-    Session
+    Agent Session
       ↓
-    conversation + agent state
+    conversation + agent config + tool state
 
-这样可以：
-
-    prewarm Environment
-         ↓
-    attach Session
+这样可以先准备 Environment，再将它关联到 Agent Session。但 Environment 是否可以跨 Session 复用、能否并发挂载、是否允许写入，必须按平台能力定义；不要默认多个租户共享同一个可写工作区。
 
 ## 9. 课堂练习
 
@@ -190,3 +186,26 @@ Prewarm 是提前准备一个将要使用的环境；Snapshot 是保存某个环
 ### Q：为什么 Sandbox Pool 很难做？
 
 因为复用环境会引入状态残留和跨 Session 数据泄露问题。
+
+
+## 11. Prewarm、Snapshot、Pool 不能混为一谈
+
+- **Prewarm**：提前做环境准备工作，降低任务到来后的等待时间。
+- **Snapshot**：保存某个状态，供恢复或复制。
+- **Pool**：预先准备可分配实例，降低创建延迟。
+
+它们可以组合，但不是同一个机制。OpenAI Agents API 的 Pre-warm 公开流程是先准备 OpenAI-hosted environment（包、文件、setup commands），待 ready 后再 attach 到 Session；这不意味着它一定保存了 VM 内存快照。
+
+## 12. 复用环境前的安全 Reset 清单
+
+至少验证：
+
+- 所有旧进程和后台进程已经退出；
+- 临时目录和 writable layer 已清空；
+- 凭证、环境变量和代理状态已清理；
+- SSH Agent / Unix Socket / Browser Profile 不会跨租户复用；
+- workspace 与 cache 的 owner / ACL 正确；
+- 网络 namespace、路由和 egress policy 已重建；
+- 新 Session 使用新的身份、policy version 和 audit context。
+
+如果不能证明 reset 完整，就销毁实例而不是放回共享 Pool。
