@@ -16,6 +16,7 @@ command -v bwrap >/dev/null 2>&1 || {
 
 args=(
   --die-with-parent
+  --clearenv
   --unshare-user
   --unshare-pid
   --unshare-ipc
