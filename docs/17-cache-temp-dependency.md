@@ -104,7 +104,7 @@ AI Agent 经常执行：
 
     npm install
     pip install
-    cargo add
+    cargo build
 
 这些命令可能下载、构建或在安装阶段执行第三方代码，但不同生态的行为不完全一样。
 
@@ -123,7 +123,7 @@ AI Agent 经常执行：
 - **npm**：依赖包可以声明 `preinstall`、`install`、`postinstall` 等 lifecycle scripts，安装时可能执行代码。
 - **Python / pip**：从 source distribution 构建时，PEP 517 build backend 会运行构建代码；安装预构建 wheel 与构建 source distribution 的执行路径不同，不能说每个 wheel 安装都会运行任意安装脚本。
 - **Rust / Cargo**：`cargo build` 可能执行依赖包的 `build.rs`；`cargo fetch` 与 build 的执行语义不同。
-- **Go**：模块下载通常不执行模块包里的构建脚本；Go 编译通常是编译而非运行包代码，但 `go test`、`go generate`、cgo 工具链以及显式调用的生成器 / 构建工具可能执行程序或脚本。
+- **Go**：模块下载通常不执行模块包里的构建脚本，但使用 VCS 源拉取时可能调用 Git 等外部客户端；Go 编译通常是编译而非运行包代码，但 `go test`、`go generate`、cgo 工具链以及显式调用的生成器 / 构建工具可能执行程序或脚本。
 
 正确结论不是“所有 install 都必然执行任意脚本”，而是：依赖获取、构建和测试链路中存在不可信代码执行点，应在 Sandbox 中运行，并限制网络、文件、凭证和资源。
 
@@ -176,3 +176,12 @@ AI Agent 经常执行：
 - Cache 清理、过期和版本隔离。
 
 推荐把**共享只读基础 Cache**和**Session 可写 Cache**分开，并且不要让不可信 Session 写入其他 Session 将直接执行的共享缓存。
+
+
+## 参考资料
+
+- npm lifecycle scripts：https://docs.npmjs.com/cli/using-npm/scripts
+- Python build isolation / PEP 517：https://packaging.python.org/en/latest/specifications/pyproject-toml/
+- Cargo build scripts：https://doc.rust-lang.org/cargo/reference/build-scripts.html
+- Go test：https://pkg.go.dev/cmd/go#hdr-Test_packages
+- Go generate：https://pkg.go.dev/cmd/go#hdr-Generate_Go_files_by_processing_source
