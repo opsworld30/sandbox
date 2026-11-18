@@ -233,3 +233,10 @@ https://code.visualstudio.com/docs/agents/concepts/trust-and-safety
 `allowUnsandboxedCommands` 默认 true：命令不能在 Sandbox 内执行时，Agent 可以请求用户批准在 Sandbox 外执行。设置为 false 才会拒绝该回退。
 
 远程 Session 的 Sandbox 必须在实际运行 Agent 的远程 Host 配置；本机 VS Code 客户端的 Sandbox 设置不会自动限制远程执行主机。当前 Copilot Cloud Sessions 本身标注为 Experimental，属于托管云环境，不应把本地 Host Sandbox 的实现和默认值直接套用过去。
+
+## 本讲实验代码
+
+- [Tool Capability Model](../labs/15-tool-capabilities/README.md)
+- [MCP stdio Server](../labs/22-mcp-stdio/README.md)
+
+这些是对应主题的可运行教学实验或产品设计复现；并非厂商内部实现的源码副本。
