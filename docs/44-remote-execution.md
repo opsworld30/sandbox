@@ -253,3 +253,10 @@ Agent 产生：
 Control Plane 管理 Session、Policy、调度和凭证发放；Data Plane 执行不可信代码。Sandbox 内的进程不应拿到 Control Plane 的主凭证，也不应直接访问 Scheduler、Metadata DB 或宿主机管理 Socket。
 
 Remote Worker 不是天然安全边界：同一 Worker Host 可能承载多个 Session，仍需要 cgroup / container / MicroVM / VM 隔离、网络策略和清理机制。
+
+## 本讲实验代码
+
+- [Remote Session API](../labs/16-remote-session-api/README.md)
+- [Mini Runtime](../labs/17-mini-runtime/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
