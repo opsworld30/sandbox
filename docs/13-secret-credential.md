@@ -229,3 +229,9 @@ https://developers.openai.com/api/docs/guides/agents-api/environments/security
 Claude Code 本地 Sandbox 的 credential masking / proxy 行为：https://code.claude.com/docs/en/sandboxing
 Anthropic sandbox-runtime：https://github.com/anthropics/sandbox-runtime
 OpenAI Agents API Sandbox Security：https://developers.openai.com/api/docs/guides/agents-api/environments/security
+
+## 本讲实验代码
+
+- [Fake Credential Broker](../labs/07-credential-broker/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
