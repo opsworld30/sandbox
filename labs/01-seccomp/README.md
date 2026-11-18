@@ -8,7 +8,7 @@
 
     Program
       ↓
-    mkdir()
+    mkdirat()
       ↓
     Kernel
       ↓
@@ -37,7 +37,7 @@
 
 1. 初始化 libseccomp；
 2. 默认允许 syscall；
-3. 添加原生架构的 `mkdir` syscall → EPERM 规则；
+3. 添加原生架构的 `mkdirat` syscall → EPERM 规则；
 4. 加载 filter；
 5. 通过 `syscall(SCMP_SYS(mkdirat), AT_FDCWD, ...)` 直接发起这个 syscall；
 6. 观察 Kernel 返回 EPERM。
@@ -52,7 +52,7 @@
         ↓
     seccomp_load(...)
         ↓
-    syscall(SCMP_SYS(mkdir), ...)
+    syscall(SCMP_SYS(mkdirat), AT_FDCWD, ...)
         ↓
     mkdirat syscall
         ↓
@@ -60,9 +60,9 @@
         ↓
     EPERM
 
-程序不是“被禁止执行 mkdtemp”。
+程序不是“被禁止执行 mkdtemp”或“被禁止运行 mkdir 命令”。
 
-真正被禁止的是它底层发出的 mkdir syscall。
+真正被禁止的是它底层发出的 `mkdirat` syscall。
 
 ## 用 strace 对比
 
