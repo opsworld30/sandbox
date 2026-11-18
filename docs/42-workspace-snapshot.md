@@ -247,3 +247,10 @@ Snapshot 记录的是状态，不是安全授权。恢复时应重新应用当�
 - Git Worktree：https://git-scm.com/docs/git-worktree
 - Linux OverlayFS：https://docs.kernel.org/filesystems/overlayfs.html
 - Linux cgroup v2：https://docs.kernel.org/admin-guide/cgroup-v2.html
+
+## 本讲实验代码
+
+- [Git Worktree Snapshot](../labs/11-worktree-snapshot/README.md)
+- [Cache Integrity](../labs/23-cache-isolation/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
