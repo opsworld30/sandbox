@@ -129,7 +129,7 @@ AI Agent 最终会执行：
 
 ### Claude Code
 
-    Local Claude Code Bash Sandbox
+    Local Claude Code command Sandbox
       ├── macOS → Seatbelt
       ├── Linux / WSL2 → bubblewrap + network proxy
       └── Native Windows → use WSL2 / container
@@ -139,7 +139,8 @@ AI Agent 最终会执行：
       covered by the Bash Sandbox.
 
     Cloud Session:
-      separate managed VM + server-side GitHub proxy
+      isolated VM per Anthropic-hosted session
+      + server-side GitHub / credential proxy
 
     Independent sandbox-runtime:
       separate project; Windows support is Alpha.
