@@ -129,3 +129,9 @@ subprocess.run(["bash", "-c", "sleep 300 & wait"], timeout=5)
 教学实验可用 process group 做基础清理；Linux 生产环境优先考虑把 Session 的所有进程放进独立 cgroup，并在销毁时终止整个 cgroup。Windows 可研究 Job Objects。单独记录 PID 再逐个 kill 容易遇到 PID 重用和竞态。
 
 **结论：** `timeout` 是执行接口的超时语义，不是完整的进程隔离和资源回收方案。
+
+## 本讲实验代码
+
+- [Runner、argv、timeout 与输出限制](../labs/03-runner-session/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
