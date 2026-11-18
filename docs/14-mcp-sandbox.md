@@ -24,19 +24,29 @@
 
 整体安全边界还是不完整。
 
-## 2. MCP Server 本质上也是进程
+## 2. MCP Server 是协议端点，不一定是本地进程
 
-很多 MCP Server 的运行模型：
+常见的两种部署：
 
-    Agent
+    Local stdio MCP
+    Agent Host
       ↓
     MCP Client
       ↓
-    MCP Server process
+    local MCP Server process
       ↓
-    Files / Network / Database
+    Files / local tools
 
-所以 MCP Server 本身就是一个执行主体。
+    Remote HTTP MCP
+    Agent Host
+      ↓
+    HTTPS / Streamable HTTP
+      ↓
+    remote MCP service
+      ↓
+    remote data / API
+
+本地 stdio MCP Server 是本机执行进程，需要在启动它的主机上做进程和资源隔离。远程 MCP Server 不在本机运行，本地 Shell Sandbox 不会自动保护远程服务；它需要在服务端部署自己的身份验证、授权、网络和运行时边界。
 
 ## 3. 为什么 MCP 更危险
 
@@ -101,21 +111,17 @@ MCP Server 往往有专门的能力：
 
     Agent Host
       ↓
-    starts MCP
+    starts / manages MCP process
       ↓
-    sandbox applies
+    configured sandbox applies
 
 和：
 
-    User manually starts MCP
+    User / another service starts MCP
       ↓
     independent process
 
-第二种可能不受 Agent Sandbox 管理。
-
-所以产品文档必须明确：
-
-> Sandbox 到底覆盖哪些进程？
+第二种通常不自动受当前 Agent Host 的 Sandbox 管理。即使产品文档说“支持 MCP Sandbox”，也要核对它具体覆盖哪些启动方式、哪些传输协议、哪些平台，以及是否只覆盖由 Agent Host 管理的 Server。
 
 ## 7. MCP 和 Prompt Injection
 
@@ -169,3 +175,18 @@ MCP response 也可能包含不可信内容。
 
 VS Code Agent Sandboxing:
 https://code.visualstudio.com/docs/agents/run/agent-sandboxing
+
+
+## 10. MCP Tool 的授权与 MCP Server 的进程隔离是两回事
+
+- MCP protocol / tool schema：描述客户端可以调用哪些工具、参数是什么。
+- Tool authorization：决定当前用户 / Session 能不能调用某个工具。
+- Server process sandbox：限制本地 MCP Server 进程能读写什么、联网到哪里、消耗多少资源。
+- Remote service isolation：限制远端 MCP 服务及其后端资源。
+
+给 MCP 工具加一个 `read_file` 权限，不代表服务器进程只能读取某个目录；反过来，把本地 MCP Server 放进进程 Sandbox，也不代表其远端 API token 只有最小权限。
+
+## 参考补充
+
+MCP 官方规范：https://modelcontextprotocol.io/specification
+VS Code Agent Sandboxing：https://code.visualstudio.com/docs/agents/run/agent-sandboxing
