@@ -152,7 +152,7 @@ Agent：
        ↓
     AddCapability
        ↓
-    Session Policy
+    Command-scoped Effective Policy
 
 例如：
 
@@ -189,7 +189,7 @@ Agent：
       "duration": "single_command"
     }
 
-Gemini CLI 的扩权针对本次命令执行；不应把它描述成永久修改整个 Session 的策略。审批后才更新：
+Gemini CLI 的扩权针对本次命令执行；不应把它描述成永久修改整个 Session 的策略。审批后为本次命令构造扩展后的：
 
     EffectivePolicy
 
