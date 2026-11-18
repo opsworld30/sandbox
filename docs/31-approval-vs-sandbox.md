@@ -166,3 +166,10 @@ Sandbox：
 用户批准一个命令，可能只代表允许执行该动作；也可能代表允许一次 Sandbox 外执行，或允许扩大某个 capability。UI 和 Runtime 必须明确告诉用户本次批准的范围、持续时间和是否移除 OS 限制。
 
 **安全原则：** 不要把“用户点了 Allow”自动等同于“永久关闭 Sandbox”。
+
+## 本讲实验代码
+
+- [Permission / Policy](../labs/08-policy-engine/README.md)
+- [Approval / Command Expansion](../labs/19-command-expansion/README.md)
+
+这些是对应主题的可运行教学实验或产品设计复现；并非厂商内部实现的源码副本。
