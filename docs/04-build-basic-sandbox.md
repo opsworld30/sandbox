@@ -116,3 +116,20 @@ Docker 是一种执行后端，不等于完整安全策略。
     Kernel
 
 下一讲开始进入现代 AI Coding Agent 的真实实现思路。
+
+
+## 本讲必须补上的一个边界
+
+如果示例只执行：
+
+```python
+subprocess.run(argv, timeout=10)
+```
+
+它不能证明整棵子进程树都能被可靠终止。请把下面三个问题分开：
+
+1. 命令本身是否超时；
+2. 命令启动的后代进程是否全部退出；
+3. Session 销毁后是否还残留后台进程、端口或文件句柄。
+
+生产 Runtime 应给每个 Session 建立可整体清理的进程边界（例如 Linux cgroup v2 / Windows Job Object），并在 destroy 后验证没有残留进程。
