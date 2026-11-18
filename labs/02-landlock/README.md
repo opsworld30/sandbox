@@ -49,7 +49,7 @@ Linux 测试 VM。
     workspace/created.txt
       → allow create + write
 
-本实验只验证代码中明确列入 `handled_access_fs` 的权限。Landlock 的规则集只会拒绝被标记为 handled 的访问类型；没有列入的权限不会自动变成 deny。因此它仍然不是完整的生产级文件系统策略。
+本实验主要验证代码中明确列入 `handled_access_fs` 的文件系统权限。一般而言，未列入 handled 的访问类型不会自动按本规则集拒绝；但 `LANDLOCK_ACCESS_FS_REFER` 有特殊的默认限制语义，不能把这句话当作绝对规则。本 Demo 也没有覆盖所有 ABI 权限，因此仍然不是完整的生产级文件系统策略。
 
 ## 这个实验和 seccomp 的区别
 
