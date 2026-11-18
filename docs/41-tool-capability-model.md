@@ -185,14 +185,11 @@ LSP 需要：
 
 ## 9. Capability Token
 
-进一步可以设计：
-
-    capability_token
-
-例如：
+可以为 Tool Broker 设计签名、短时、范围受限的 capability token：
 
     {
       "session": "s1",
+      "audience": "git-proxy",
       "tool": "git",
       "capabilities": [
         "repo.read",
@@ -201,7 +198,9 @@ LSP 需要：
       "expires_at": "..."
     }
 
-Tool 每次请求都必须验证。
+实际实现还需要签名校验、audience 校验、过期时间、重放保护、撤销策略和最小作用域。
+
+如果 Token 是 Bearer Token，且放进 Agent 可读的环境变量或文件，它仍可能被外传。若目标是让 Agent 拿不到真实 GitHub Token，应让 Tool Broker 验证 capability 并代为执行 Git 操作，而不是把底层凭证返回给模型或 Shell。
 
 ## 10. 为什么这比“大一统 Sandbox”高级
 
