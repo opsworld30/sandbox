@@ -108,7 +108,7 @@ AI Agent 经常执行：
     pip install
     cargo add
 
-这些命令会下载并执行第三方代码。
+这些命令可能下载、构建或在安装阶段执行第三方代码，但不同生态的行为不完全一样。
 
 因此：
 
@@ -120,19 +120,14 @@ AI Agent 经常执行：
 
 需要一起考虑。
 
-## 7. postinstall 风险
+## 7. 不同生态的安装脚本不能一概而论
 
-某些包安装时可能运行：
+- **npm**：依赖包可以声明 `preinstall`、`install`、`postinstall` 等 lifecycle scripts，安装时可能执行代码。
+- **Python / pip**：从 source distribution 构建时，PEP 517 build backend 会运行构建代码；安装预构建 wheel 与构建 source distribution 的执行路径不同，不能说每个 wheel 安装都会运行任意安装脚本。
+- **Rust / Cargo**：`cargo build` 可能执行依赖包的 `build.rs`；`cargo fetch` 与 build 的执行语义不同。
+- **Go**：模块下载通常不执行模块的构建脚本，但后续编译、测试或工具调用仍会执行代码。
 
-    install script
-
-所以：
-
-    npm install
-       ↓
-    arbitrary code execution
-
-本质上就是 Sandbox 要保护的场景。
+正确结论不是“所有 install 都必然执行任意脚本”，而是：依赖获取、构建和测试链路中存在不可信代码执行点，应在 Sandbox 中运行，并限制网络、文件、凭证和资源。
 
 ## 8. 推荐架构
 
@@ -170,3 +165,16 @@ AI Agent 经常执行：
 ### Q：为什么依赖安装是高风险操作？
 
 因为安装过程可能执行第三方脚本，并获得当前 Sandbox 的文件、网络和进程权限。
+
+
+## 11. Cache 是数据边界，也是供应链边界
+
+只读共享 Cache 能降低跨 Session 写入污染，但不能自动保证内容可信。仍要考虑：
+
+- Cache artifact 的来源、完整性和校验；
+- 私有 Registry token 是否写入配置文件或日志；
+- 不同租户能否观察到 package 名称、路径或元数据；
+- 可写 cache 是否能投毒其他 Session；
+- Cache 清理、过期和版本隔离。
+
+推荐把**共享只读基础 Cache**和**Session 可写 Cache**分开，并且不要让不可信 Session 写入其他 Session 将直接执行的共享缓存。
