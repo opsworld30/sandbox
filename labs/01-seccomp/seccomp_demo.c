@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/syscall.h>
 #include <seccomp.h>
 
 int main(void) {
@@ -43,14 +44,16 @@ int main(void) {
 
     printf("seccomp filter loaded\n");
 
-    char path[] = "/tmp/seccomp-demo-XXXXXX";
+    const char *path = "/tmp/seccomp-demo-created-by-filter";
 
     /*
-     * mkdtemp eventually needs mkdir-like kernel functionality.
-     * Because mkdir is filtered, this should fail with EPERM.
+     * Call the exact syscall being filtered. This avoids depending on
+     * whether a particular libc wrapper uses mkdir() or mkdirat().
+     * SCMP_SYS(mkdir) resolves the native-architecture syscall number.
      */
-    if (mkdtemp(path) == NULL) {
-        printf("mkdtemp failed as expected: errno=%d (%s)\n",
+    long rc = syscall(SCMP_SYS(mkdir), path, 0700);
+    if (rc == -1) {
+        printf("mkdir syscall blocked as expected: errno=%d (%s)\n",
                errno, strerror(errno));
     } else {
         printf("unexpected success: %s\n", path);
