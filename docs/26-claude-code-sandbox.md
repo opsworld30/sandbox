@@ -119,7 +119,7 @@ Native Windows 不提供 Claude Code 本地命令 Sandbox；Windows 用户需要
           Job Object + filesystem ACEs
       → optional MXC BaseContainer backend
 
-Windows 这一项属于独立 sandbox-runtime 的 Alpha 实现，不是 Claude Code 原生 Windows Bash Sandbox。当前项目的 `mxc` Backend 需要受支持的 Windows BaseContainer 环境；它与默认 `srt-win` Backend 的用户身份、ACL 和网络实现不同。
+Windows 这一项属于独立 sandbox-runtime 的 Alpha 实现，不是 Claude Code 原生 Windows Bash Sandbox。当前项目的实验性 `mxc` Backend 需要受支持的 Windows BaseContainer 环境和 Node.js 24+ MXC SDK；它与默认 `srt-win` Backend 的用户身份、ACL 和网络实现不同，且不支持时不会自动降级到 `srt-win`。
 
 ## 5. 为什么“无容器”也可以 Sandbox
 
