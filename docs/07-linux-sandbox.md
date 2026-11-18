@@ -103,6 +103,25 @@ Landlock 是 Linux Kernel 提供的 unprivileged access-control 机制。
 
 从 ABI v4 起，Landlock 可按 TCP 端口限制 bind / connect；ABI v10 起增加 UDP 端口限制。它不是按域名（FQDN）做 allowlist 的机制。
 
+### Landlock ABI 关键演进
+
+| ABI | 关键新增能力 |
+|---:|---|
+| 1 | 基础文件系统访问规则 |
+| 2 | `LANDLOCK_ACCESS_FS_REFER` |
+| 3 | `LANDLOCK_ACCESS_FS_TRUNCATE` |
+| 4 | TCP bind / connect 端口规则 |
+| 5 | 设备 ioctl 控制 |
+| 6 | abstract Unix socket / signal scope |
+| 7 | Landlock audit logging flags |
+| 8 | `LANDLOCK_RESTRICT_SELF_TSYNC` |
+| 9 | pathname Unix socket 控制 |
+| 10 | UDP 端口规则与 quiet audit flags |
+| 11 | `LANDLOCK_RESTRICT_SELF_NO_NEW_PRIVS` |
+| 12 | namespace / capability use 限制 |
+
+运行时必须查询 ABI，只使用当前 Kernel 支持的能力；不能只按编译时头文件版本推断运行时支持。
+
 ## 6. seccomp
 
 seccomp 更关注：
