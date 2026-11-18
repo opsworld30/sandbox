@@ -1,6 +1,6 @@
 # 第 19 讲：Container、MicroVM、VM、OS Sandbox 到底怎么选
 
-## 1. 没有“最好”的 Sandbox
+## 1. 没有固定的“安全等级排行榜”
 
 正确问题不是：
 
@@ -8,7 +8,9 @@
 
 而是：
 
-> 我的威胁模型、启动延迟、兼容性和成本是什么？
+> 我的威胁模型、攻击者能力、内核共享方式、启动延迟、兼容性和成本是什么？
+
+下面比较的是典型架构特征，不是对所有实现的绝对安全排名。配置错误的 MicroVM 可能比正确配置的 Container 更危险；OS Sandbox 也可能因为开放过多路径和 Socket 而失去价值。
 
 ## 2. Permission
 
@@ -90,17 +92,19 @@
 
 ## 5. MicroVM
 
-例如 Firecracker 这一类思路：
+例如 Firecracker 这一类 VMM：
 
     Guest kernel
        ↓
-    Virtual machine boundary
+    virtual CPU / memory / device model
+       ↓
+    host KVM / hypervisor boundary
        ↓
     Host
 
-特点：
+MicroVM 通常使用精简设备模型和专用 VMM，目标是在提供 VM 级硬件虚拟化边界的同时降低启动和资源开销。
 
-> 比 Container 更强的隔离，同时比传统 VM 更轻量。
+但“MicroVM 一定比传统 VM 安全”不是严谨结论。安全性取决于 Hypervisor / VMM、设备模型、Host Kernel、配置和运维。
 
 适合：
 
@@ -111,7 +115,7 @@
 
 ## 6. Full VM
 
-最强的通用隔离边界之一：
+VM 提供 Guest Kernel 与 Host 之间的虚拟化边界，是强隔离方案之一，但不能笼统说“最强”。Hypervisor、虚拟设备、共享目录、剪贴板、网络和 Guest Agent 都可能形成跨边界通道。
 
     Guest OS
        ↓
@@ -130,17 +134,17 @@
 - 内存大；
 - 运维成本高。
 
-## 7. 一个粗略对比
+## 7. 比较时应该看哪些维度
 
-| 技术 | 隔离 | 启动 | 成本 | 兼容性 |
+| 方案 | 主要边界 | 是否共享 Host Kernel | 典型优势 | 典型代价 |
 |---|---|---|---|---|
-| Permission | 低 | 极快 | 极低 | 极高 |
-| OS Sandbox | 中高 | 快 | 低 | 依赖 OS |
-| Container | 高 | 快 | 中 | Linux 最自然 |
-| MicroVM | 很高 | 中快 | 中高 | 较高 |
-| VM | 很高 | 慢 | 高 | 高 |
+| Permission / Approval | 用户或策略决策 | 是 | 易集成、低开销 | 不是 OS 隔离，依赖审批流程 |
+| OS Sandbox | OS 对进程施加的访问限制 | 是 | 启动快、可用宿主机工具链 | 平台相关，策略难写，仍共享 Kernel |
+| Container | namespaces / cgroups / LSM 等组合 | 通常共享 | 环境封装、生态成熟 | Host Kernel 共享，需加固配置 |
+| MicroVM | 虚拟机 / VMM 边界 | Guest 有独立 Kernel | 适合不可信多租户执行 | VMM / Hypervisor 复杂度与资源成本 |
+| Full VM | 虚拟化硬件边界 | Guest 有独立 Kernel | OS 兼容性高、边界清晰 | 启动、内存和运维成本可能较高 |
 
-这不是绝对安全等级，只是工程选择的粗略参考。
+不要把 Permission 当成和 Container 同级的 Sandbox 技术。它是决策控制层，通常需要和 OS enforcement 组合。
 
 ## 8. AI Coding 的实际选择
 
@@ -210,3 +214,15 @@ OS Sandbox 很合适。
 ### Q：什么时候优先 MicroVM？
 
 执行不可信代码、多租户、需要更强隔离但又要求比完整 VM 更快时。
+
+
+## 11. 选择时必须先问的六个问题
+
+1. 代码是否来自不可信用户或第三方仓库？
+2. 攻击者是否可能主动尝试 Sandbox Escape？
+3. 是否允许访问宿主机凭证、Unix Socket 或内网？
+4. 需要兼容哪些 OS、语言和开发工具？
+5. 每秒创建多少 Sandbox，启动延迟和内存预算是多少？
+6. 失败时是否 fail-closed，还是允许绕过到宿主机执行？
+
+只有回答这些问题，才能有依据地选择 OS Sandbox、Container、MicroVM 或 VM。
