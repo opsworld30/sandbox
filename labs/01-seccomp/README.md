@@ -78,7 +78,7 @@
     write
     exit_group
 
-你会看到程序仍然可以正常执行大量 syscall，但 mkdir 被 filter 改变了结果。
+你会看到程序仍然可以正常执行大量 syscall，但 `mkdirat` 被 filter 改变了结果。
 
 ## 进一步实验
 
@@ -90,7 +90,7 @@
 
     SCMP_ACT_LOG
 
-然后观察系统日志。
+注意：`SCMP_ACT_LOG` 会记录并继续允许该 syscall，不会阻止创建目录。日志是否可见取决于 Kernel 支持和 audit / 日志配置；先确认动作支持情况，再观察系统日志。
 
 再把它改成：
 
