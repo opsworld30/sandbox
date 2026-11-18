@@ -242,10 +242,10 @@ https://cursor.com/blog/secure-sandbox
 
 当前 Cursor 文档区分：
 
-- `permissions.json`：定义 allow / deny 规则；Auto-review 先应用这些规则，再对未覆盖的动作使用 Classifier；
-- `sandbox.json`：配置 Sandbox 能访问的路径、网络域名、临时目录等。
+- `permissions.json`：用自然语言的 `allow_instructions` / `block_instructions` 告诉 Auto-review 对哪些动作倾向于放行或阻止；它是 Classifier 的判断指导，不是确定性的 OS allow / deny 规则；
+- `sandbox.json`：配置 Sandbox 真正能访问的路径、网络域名、临时目录等。
 
-这两个文件不是一个总开关。即使 Permission 允许某个动作，也不代表 Sandbox 自动授予该动作需要的文件或网络能力。
+这两个文件不是一个总开关。即使 `permissions.json` 指示 Auto-review 倾向放行某个动作，也不代表 Sandbox 自动授予该动作需要的文件或网络能力；真正的执行边界仍由 `sandbox.json` 对应的 Sandbox policy 与 OS enforcement 决定。
 
 
 ## 12. Auto-review 不只审查 Shell
