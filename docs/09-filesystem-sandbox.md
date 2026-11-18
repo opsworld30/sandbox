@@ -264,3 +264,25 @@ Landlock 文件系统访问限制不会追溯作用于进入 Sandbox 前已经�
 Landlock 默认通过 `landlock_restrict_self()` 限制调用线程及其后代。ABI v8 起可以通过 `LANDLOCK_RESTRICT_SELF_TSYNC` 把规则原子地同步应用到当前进程的所有线程。
 
 无特权进程通常需要先设置 `PR_SET_NO_NEW_PRIVS` 才能 enforce Landlock；ABI v11 起也可以使用 `LANDLOCK_RESTRICT_SELF_NO_NEW_PRIVS`，由 `restrict_self` 在成功时设置该属性。具体调用应按运行中 ABI 和目标线程模型实现。
+
+
+## 15. Landlock 不是完整的文件元数据审计 / 权限管理器
+
+Kernel 文档明确列出一些 Landlock 目前不能单独限制的文件相关操作，例如：
+
+- `stat` / `access`；
+- `chmod` / `chown`；
+- `flock`；
+- `setxattr` / `utime`；
+- 部分 `fcntl` 操作。
+
+因此不要把“Landlock 已启用”描述成“所有文件系统相关 syscall 都已被限制”。对这些操作，应结合传统 DAC 权限、mount namespace、其他 LSM、丢弃不必要的 capability 和具体系统调用策略。
+
+## 16. Bind Mount 与 OverlayFS 的规则传播不同
+
+- **Bind mount**：源和目标是同一文件层次的不同挂载视图，Landlock 的层次限制可以沿 bind mount 传播。
+- **OverlayFS**：lower、upper 和 merged 层在 Landlock 看来是独立的文件层次；限制某一层不会自动限制 merged 视图，反之亦然。
+
+如果 Runtime 使用 OverlayFS / overlay writable layer，必须针对 Agent 实际访问的 merged hierarchy 建立规则，并单独核对 upper / lower 层是否暴露给进程。不能只给 lower 或 upper 路径加规则，就推断 merged workspace 也已被限制。
+
+参考：https://docs.kernel.org/userspace-api/landlock.html
