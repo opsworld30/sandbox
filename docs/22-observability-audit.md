@@ -118,25 +118,21 @@
 
 ## 8. Trace
 
-一次 Agent Turn：
+一次 Agent Turn 可以尝试关联：
 
-    LLM
+    Agent Turn
       ↓
     Tool Call
       ↓
-    Policy
+    Policy Decision
       ↓
-    Sandbox
+    Sandbox Session
       ↓
-    Process
-      ↓
-    Network
+    Process / Network Event
 
-最好能够通过 trace_id 串起来。
+通过 trace_id、session_id、tool_call_id 和 process identity 建立关联。
 
-这样可以回答：
-
-> 哪一次模型决策最终导致哪个系统调用被拒绝？
+但要注意：普通的应用 Trace 不会自动知道 Kernel 拒绝了哪个 syscall。要观测 syscall 级别的拒绝，需要额外启用 seccomp logging、audit、eBPF / tracepoint 或其他 OS 级观测机制，并考虑权限、性能和日志完整性。
 
 ## 9. 安全和隐私
 
@@ -165,3 +161,16 @@ Audit 本身不能变成新的数据泄露源。
 ### Q：Audit 应该记录什么？
 
 记录决策和元数据，不应无脑记录敏感数据本身。
+
+
+## 11. Policy Decision 与 OS Audit Event 不要混淆
+
+- Policy Decision：Runtime 在执行前或工具调用阶段做出的 allow / deny / ask。
+- Enforcement Event：OS / Proxy / cgroup 实际阻止或限制了某个动作。
+- Application Event：命令退出码、超时、stdout / stderr 等应用层结果。
+
+这三类事件的粒度和可信度不同。没有启用文件审计或 syscall tracing 时，不要声称 Audit 已记录“所有文件读写”或“每一个系统调用”。
+
+## 12. 日志本身也要防泄露
+
+命令行参数、环境变量、URL query、HTTP header 和异常堆栈都可能带有 Secret。审计系统应做字段级脱敏、访问控制、保留期限和防篡改设计。
