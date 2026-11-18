@@ -8,7 +8,7 @@ Python 3.10+，无第三方依赖：
 python3 demo.py
 ```
 
-程序会输出 JSONL 审计事件。Session ID 经过 SHA-256 摘要处理；Token / Authorization 等敏感字段会被脱敏；不记录原始命令输出。
+程序会输出 JSONL 审计事件。Session ID 经过 SHA-256 摘要处理；Token / Authorization 等敏感字段会被脱敏；不记录原始命令输出。这里的无盐 Hash 只是演示稳定标识，不是匿名化；生产环境应使用带服务端密钥的 HMAC，并限制关联权限。
 
 ## 进一步实验
 
