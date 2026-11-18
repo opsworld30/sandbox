@@ -112,12 +112,14 @@ Native Windows 不提供 Claude Code Bash Sandbox；Windows 用户需要通过 W
 
     Windows
       → Alpha implementation
-      → dedicated srt-sandbox local user
-      → WFP egress fence
-      → write-restricted token
-      → filesystem ACEs
+      → default srt-win backend:
+          dedicated srt-sandbox local user
+          WFP egress fence
+          write-restricted token
+          Job Object + filesystem ACEs
+      → optional MXC BaseContainer backend
 
-Windows 这一项属于独立 sandbox-runtime 的 Alpha 实现，不是 Claude Code 原生 Windows Bash Sandbox。
+Windows 这一项属于独立 sandbox-runtime 的 Alpha 实现，不是 Claude Code 原生 Windows Bash Sandbox。当前项目的 `mxc` Backend 需要受支持的 Windows BaseContainer 环境；它与默认 `srt-win` Backend 的用户身份、ACL 和网络实现不同。
 
 ## 5. 为什么“无容器”也可以 Sandbox
 
@@ -328,6 +330,6 @@ Claude Code 官方文档指出，Sandboxed Bash 默认继承 Claude Code 的环�
 
 ## 15. Cloud Session 的网络默认值
 
-Claude Code on the web 的网络控制和本地 Bash Sandbox 是不同配置面。Anthropic-hosted Cloud Session 默认使用受限网络访问；可访问的服务、依赖安装能力和 GitHub Proxy 行为由 Cloud Session 的网络设置决定。不要把本地 Sandbox 的 `allowedDomains` 配置直接套用到 Cloud Session，也不要假设关闭一般网络后 GitHub 代理凭证也会暴露给 VM。
+Claude Code on the web 的网络控制和本地 Bash Sandbox 是不同配置面。Anthropic-hosted Cloud Session 默认使用受限网络访问；可访问的服务、依赖安装能力和 GitHub Proxy 行为由 Cloud Session 的网络设置决定。即使关闭一般网络，Session 仍可与 Anthropic API 通信，因此“关闭外网”不等于“没有任何数据离开 VM”。不要把本地 Sandbox 的 `allowedDomains` 配置直接套用到 Cloud Session，也不要假设 GitHub 代理凭证会进入 VM。
 
 参考：https://code.claude.com/docs/en/claude-code-on-the-web
