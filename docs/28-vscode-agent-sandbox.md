@@ -156,7 +156,7 @@ Cloud Agent：
 - Git HTTPS 凭证与 GitHub CLI 认证默认可在 Sandbox 中使用（`authenticategit` / `authenticategh` 均默认 true）；
 - 允许申请 Sandbox 外执行的开关默认 true，实际执行仍需确认。
 
-这意味着 Sandbox 不等于“进程没有凭证”。若任务不需要 GitHub 权限，应关闭对应凭证注入能力。
+这意味着 Sandbox 不等于“进程没有凭证”。若任务不需要 GitHub 权限，应关闭对应凭证注入能力。系统依赖缺失时，默认工具不会静默退回到无 Sandbox 执行，而会提示修复依赖；应在实际执行主机上安装并检查依赖。
 
 平台支持：
 
