@@ -95,7 +95,7 @@ Landlock：
 
 > 调用线程进入 Landlock domain；之后由它创建的子进程/线程会继承限制。
 
-注意：`landlock_restrict_self()` 不会自动追溯限制已经存在的其他线程。实际程序应在创建工作线程之前安装策略，或确保所有需要保护的线程都分别处于正确的 Landlock domain。
+注意：本实验使用 flags=0，因此不会自动同步限制已经存在的其他线程。Landlock ABI v8 起可使用 `LANDLOCK_RESTRICT_SELF_TSYNC` 将规则同步到当前进程所有线程。实际程序应按运行中 ABI 明确选择在线程创建前安装策略，或使用 TSYNC。
 
 ## 注意
 
