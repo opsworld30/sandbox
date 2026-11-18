@@ -221,3 +221,18 @@ OpenAI Agents API 当前提供两种需要区分的情况：
 因此，共享 Pre-warmed Environment 不是“每个 Session 自动得到一份隔离副本”。如果任务之间不能互相读取或修改状态，应分别创建 Environment，而不是只创建多个 Session。
 
 参考：https://developers.openai.com/api/docs/guides/agents-api/environments/prewarmed
+
+
+## 14. Pre-warm Environment 的生命周期也会影响 Pool 设计
+
+截至 2026-11-18，OpenAI Pre-warm 文档还说明：
+
+- Environment 未附加 Session 时，5 分钟后过期；预热应靠近任务开始时间。
+- 预热阶段（附加前）不收取 Sandbox 容器使用费；附加 Session 后按标准容器价格计费。
+- 第一个 Session 附加后开始 20 分钟 idle lifetime；任一 Session 活动或通过 Environment File API 操作会延长空闲期限。
+- 没有活动任务时，Environment 可能进入 `suspended`，并保留 checkpoint 7 天；Suspended 会停止计算资源，但不会删除共享 workspace。
+- 删除某个 Session 只会把该 Session 从共享 Environment 中移除，不会删除 workspace 或 checkpoint。
+
+这些是 OpenAI 当前 API 的具体生命周期规则，不是所有 Sandbox Pool 的通用默认值。旧版 Environment 可能仍保持单 Session 生命周期。
+
+参考：https://developers.openai.com/api/docs/guides/agents-api/environments/prewarmed
