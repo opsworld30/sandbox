@@ -174,3 +174,9 @@ Audit 本身不能变成新的数据泄露源。
 ## 12. 日志本身也要防泄露
 
 命令行参数、环境变量、URL query、HTTP header 和异常堆栈都可能带有 Secret。审计系统应做字段级脱敏、访问控制、保留期限和防篡改设计。
+
+## 本讲实验代码
+
+- [Audit Event 与 Secret Redaction](../labs/12-audit-events/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
