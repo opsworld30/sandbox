@@ -194,7 +194,9 @@ Self-hosted：
 
 截至 2026-11-18，OpenAI Agents API 的 OpenAI-hosted sandbox 文档描述的是一个 Linux workspace，采用 container 资源规格（small / medium / large），每个 Session 有独立 workspace，文件在 Sandbox 存续期间跨 turns 保留；还可以设置 network access（enabled / disabled / restricted）。
 
-这属于 Agents API 的 OpenAI-hosted sandbox，不能和 Codex Cloud 的所有内部实现简单画等号。常规 Session 的 workspace 按 Session 隔离；另有 Pre-warm API 创建的共享 Environment 可被多个 Session 附加，附加后的 Session 共享 workspace、文件、进程、已安装包和环境配置（当前文档注明最多 128 个 Session）。需要隔离数据的任务应创建独立 Environment。产品、API 和不同执行面需要分开描述。
+这属于 Agents API 的 OpenAI-hosted sandbox，不能和 Codex Cloud 的所有内部实现简单画等号。当前文档给出的容器规格为 small（1 vCPU / 1 GB）、medium（2 vCPU / 4 GB，默认）、large（4 vCPU / 16 GB）。网络策略可设为 enabled（默认，除非继承 Template 策略）、disabled 或 restricted；restricted 只接受 1～100 个精确主机名，不接受通配符、协议、路径或端口，子域名和重定向目标需要分别加入。
+
+常规 Session 的 workspace 按 Session 隔离；另有 Pre-warm API 创建的共享 Environment 可被多个 Session 附加，附加后的 Session 共享 workspace、文件、进程、已安装包和环境配置（当前文档注明最多 128 个 Session）。需要隔离数据的任务应创建独立 Environment。文件在 Sandbox 存续期间跨 turns 保留，`/workspace/outputs` 中的文件可在 turn 完成后发布为不可变 artifact。产品、API 和不同执行面需要分开描述。
 
 参考：
 - OpenAI-hosted sandboxes：https://developers.openai.com/api/docs/guides/agents-api/environments/openai-hosted
