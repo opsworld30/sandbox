@@ -289,3 +289,9 @@ seccomp 控制 syscall 能力，cgroups 控制资源消耗。一个限制“能�
 | 磁盘容量 | filesystem quota / project quota | 需要文件系统或存储层支持 |
 
 资源策略必须在 OS / 存储层强制执行，不应只靠应用层计数器。
+
+
+## 参考
+
+- Linux cgroup v2：https://docs.kernel.org/admin-guide/cgroup-v2.html
+- Linux `getrlimit(2)` / `setrlimit(2)`：https://man7.org/linux/man-pages/man2/getrlimit.2.html
