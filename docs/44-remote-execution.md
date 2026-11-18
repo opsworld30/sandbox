@@ -92,21 +92,18 @@ SSH 解决：
       ↓
     workload process
 
-Worker Host 可以是 VM、物理机或集群节点；Container 是一种 workload packaging / isolation 方式；gVisor 是可作为容器运行时使用的用户态 Kernel sandbox（例如 runsc），MicroVM 则由 VMM / Hypervisor 启动。不要把 gVisor 直接写成 Worker Host 类型。
-
-Worker workload 可以运行在：
+Worker Host 可以是 VM、物理机或集群节点；它承载具体的 workload。需要区分 Host 类型和 workload 隔离运行时：
 
     VM / MicroVM
       └── guest OS / workload
 
     Container
-      └── container runtime
+      └── OCI container runtime
 
     gVisor
-      └── runsc runtime，作为容器运行时 / 用户态 Kernel sandbox
+      └── runsc：容器运行时接口 + 用户态 Kernel sandbox
 
-gVisor 不是 Worker Host 的机器类型；它是可用于运行容器工作负载的隔离运行时。
-
+gVisor 不是 Worker Host 的机器类型；MicroVM 则由 VMM / Hypervisor 提供虚拟机边界。
 ## 6. Multi-tenancy
 
 云端最大的变化：
