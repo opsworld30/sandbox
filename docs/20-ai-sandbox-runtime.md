@@ -132,7 +132,7 @@ Policy Engine 接收的是结构化的主体、动作、资源和上下文，而
       protocol
       action
 
-其中 FQDN / domain allowlist 通常由强制 Egress Proxy 或 DNS + Firewall 组合实现；不能指望 seccomp 或 Landlock 单独做域名白名单。必须阻断绕过 Proxy 的 direct socket 路径。
+其中 FQDN / domain allowlist 通常由强制 Egress Proxy 实现；DNS + Firewall 组合也必须确保解析结果与实际连接目标绑定，并防止 DNS rebinding、重定向和 direct socket 绕过。不能指望 seccomp 或 Landlock 单独做域名白名单。必须阻断绕过 Proxy 的 direct socket 路径。
 
 例如：
 
@@ -217,7 +217,7 @@ Policy Engine 接收的是结构化的主体、动作、资源和上下文，而
 
     Agent
       ↓
-    exec("npm test")
+    exec(argv=["npm", "test"])
       ↓
     Policy Engine
       ↓
