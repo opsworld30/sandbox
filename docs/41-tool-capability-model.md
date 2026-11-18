@@ -258,3 +258,8 @@ Tool 每次请求都必须验证。
     Sandbox
       ↓
     OS
+
+
+## 13. Remote MCP / Tool 的边界
+
+本机 Tool Sandbox 只限制本机执行进程。Remote MCP Server、Browser Service、Database API 的服务端仍需自己的身份认证、授权、网络和租户隔离。Tool Capability 应跨服务边界验证，而不能只在本地 UI 中声明一次。
