@@ -230,3 +230,10 @@ GitHub source:
 https://github.com/google-gemini/gemini-cli
 
 **核验日期：2026-11-18。** Windows Native、LXC/LXD 等支持状态和配置名称应以当前官方文档为准。
+
+
+## 12. Gemini CLI 自身运行在 Docker 里时的一个坑
+
+如果 Gemini CLI 本身已经运行在一个 Docker 容器里，而你又选择 Docker Sandbox，CLI 可能需要访问宿主机 Docker Socket 来创建 sibling sandbox container，并且 workspace 的绝对路径必须与宿主机看到的路径一致。
+
+这意味着 `/var/run/docker.sock` 是高权限能力：不要为了让 Sandbox 正常工作，就无条件把 Docker Socket 暴露给不可信 Agent 进程。应把创建 Sandbox 的职责放在可信 Host / Broker 一侧。
