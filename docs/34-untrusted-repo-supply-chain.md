@@ -29,7 +29,7 @@ Agent：
 - `npm install` 可能触发依赖包声明的 lifecycle scripts；
 - `pip install` 从 source distribution 构建时会运行 PEP 517 build backend；预构建 wheel 的安装路径不同，不能说每个 wheel 都执行任意安装脚本；
 - `cargo build` 可能运行依赖包的 `build.rs`；
-- Go 模块下载通常不执行模块构建脚本，但 `go test`、构建工具和生成器会执行代码。
+- Go 模块下载通常不执行模块构建脚本，但从 VCS 源获取模块时可能调用 Git 等外部客户端；`go test`、`go generate`、cgo 工具链和生成器也可能执行程序或脚本。
 
 因此更准确的结论是：
 
