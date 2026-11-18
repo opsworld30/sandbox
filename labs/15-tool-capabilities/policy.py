@@ -19,7 +19,7 @@ class CapabilityDenied(PermissionError):
 
 class ToolBroker:
     def __init__(self, policies=None):
-        self.policies = policies or POLICIES
+        self.policies = POLICIES if policies is None else policies
 
     def require(self, tool: str, capability: str) -> None:
         policy = self.policies.get(tool)
