@@ -19,6 +19,8 @@ VS Code Agent 运行环境非常复杂：
 
 ## 2. Terminal Sandbox
 
+截至 2026-11-18，VS Code 当前 Agent Sandbox 文档针对使用默认工具的 Copilot Harness sessions。不要把它泛化成所有 VS Code 扩展、所有自定义 Agent Harness 都使用同一实现。
+
 Agent 可能执行：
 
     npm test
@@ -39,6 +41,8 @@ Agent 可能执行：
     child process
 
 ## 3. MCP Server 为什么也要 Sandbox
+
+VS Code 当前文档说明：由 Agent Host 为该 Session 启动或管理的 MCP Server，可以在启用 Sandbox 时一并受限；独立启动的 MCP Server 不在这项覆盖范围内。
 
 假设：
 
@@ -65,6 +69,8 @@ Agent 可能执行：
 > Tool Server 本身也是不可信执行面。
 
 ## 4. Language Server 也一样
+
+同样，当前 Copilot Harness 文档支持对该 Session 启动或管理的 Language Server 施加 Sandbox。独立启动的 LSP 进程不应被假设自动纳入边界。
 
 LSP Server 可能是：
 
@@ -139,26 +145,34 @@ Cloud Agent：
 
 所以 Threat Model 会改变。
 
-## 7. VS Code 的安全提醒
+## 7. VS Code 当前默认值与平台支持
 
-官方文档明确强调：
+截至 2026-11-18，Copilot Harness 默认工具的公开配置包括：
+
+- Sandbox enabled：默认 off，需要显式开启；
+- outbound network `allowNetwork`：默认 true；
+- local network `allowLocalNetwork`：默认 false；
+- 托管 MCP Server / LSP Server 的 Sandbox 开关默认 true；
+- 允许申请 Sandbox 外执行的开关默认 true，实际执行仍需确认。
+
+平台支持：
+
+    macOS 15+
+      → Seatbelt
+
+    glibc Linux / WSL2
+      → bubblewrap + slirp4netns + util-linux + iptables
+
+    Windows 11
+      → BaseContainer（Experimental）
+
+Alpine / musl Linux 和 WSL1 不在当前该 Runtime 的支持范围内。Windows 的 per-server MCP sandboxing 也有单独限制。
+
+官方文档还明确强调：
 
 > Sandbox 不是 VM，也不是完整用户账号边界。
 
-这句话非常重要。
-
-如果 Sandbox 进程仍然使用你的账户：
-
-    UID = user
-
-那么：
-
-    Credential
-    SSH Agent
-    Browser data
-    Docker socket
-
-仍可能成为风险来源。
+受限进程仍在执行主机上运行，并可能仍使用当前用户身份；凭证、开发工具目录、额外路径和 Sandbox 外执行都会改变实际隔离强度。
 
 ## 8. 实验
 
@@ -180,10 +194,23 @@ Cloud Agent：
 
 > Agent Sandbox 实际上是“整个 Tool Runtime Sandbox”。
 
-## 9. 参考
+## 9. Network 默认值是一个容易忽略的坑
+
+打开 Sandbox 并不意味着默认断网。当前 Copilot Harness 文档中的 `chat.agent.sandbox.network.allowNetwork` 默认是 `true`，并通过 allowed / denied domains 进一步控制目的地。
+
+如果要实现“默认断网”，必须显式设置网络策略并检查实际生效策略。还要注意 Sandbox 外执行请求会移除该次操作的文件系统和网络限制。
+
+## 10. 参考
 
 VS Code Agent Sandboxing:
 https://code.visualstudio.com/docs/agents/run/agent-sandboxing
 
 VS Code Trust & Safety:
 https://code.visualstudio.com/docs/agents/concepts/trust-and-safety
+
+**核验日期：2026-11-18。** 本讲针对 Copilot Harness 默认工具；Local Harness、Custom Terminal Tools、Cloud Sessions 和 per-server MCP sandboxing 有不同的设置与限制。
+
+
+## 11. 一个重要区分：Built-in Tools 与 OS Process Tools
+
+当前文档说明，Terminal 和被 Agent Host 管理的 MCP / LSP 进程可应用 Sandbox；不启动 OS 进程的 Built-in Tools 使用自身的权限检查。这些工具不能简单画成同一条操作系统进程树。
