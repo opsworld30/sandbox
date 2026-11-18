@@ -144,8 +144,8 @@ AI Agent 最终会执行：
       + server-side GitHub / credential proxy
 
     Independent sandbox-runtime:
-      separate project; Windows support is Alpha
-      (default srt-win + optional MXC BaseContainer backend).
+      separate project; Windows srt-win is Alpha
+      (optional experimental MXC BaseContainer backend).
 
 ### Cursor
 
