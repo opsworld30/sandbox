@@ -179,3 +179,10 @@ Sandbox 是安全目标。
 ### Q2：为什么 AI Agent 更需要 Sandbox？
 
 因为 Agent 会动态生成和执行工具调用，行为具有不确定性，必须把安全边界放在模型之外的运行时。
+
+## 本讲实验代码
+
+- [Runner / Session 最小执行器](../labs/03-runner-session/README.md)
+- [Mini Runtime 综合项目](../labs/17-mini-runtime/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
