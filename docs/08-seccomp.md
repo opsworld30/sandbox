@@ -143,8 +143,6 @@ AI Agent 可以执行任意语言：
 
 不执行 syscall，直接给程序返回错误。
 
-例如：
-
     EPERM
 
 ### KILL_PROCESS / KILL_THREAD
@@ -176,8 +174,6 @@ AI Agent 可以执行任意语言：
     allow / deny / respond
 
 这已经开始接近 Policy Engine。
-
-但 USER_NOTIF 不是“把任意 syscall 安全搬到用户态执行”的通用机制。特别是涉及用户态指针、文件路径、文件描述符和 TOCTOU 的请求，supervisor 必须谨慎处理；不要把收到通知后直接代替目标进程执行操作当成安全设计。
 
 但 USER_NOTIF 不是“把任意 syscall 安全搬到用户态执行”的通用机制。特别是涉及用户态指针、文件路径、文件描述符和 TOCTOU 的请求，supervisor 必须谨慎处理；不要把收到通知后直接代替目标进程执行操作当成安全设计。
 
@@ -218,8 +214,6 @@ Python、Node、Go、Rust 又有不同运行时。
 
 使用 strace 等工具观察程序正常运行需要什么 syscall。
 
-例如：
-
     strace -f -o trace.log python -c "print('hello')"
 
 注意：
@@ -237,8 +231,6 @@ Python、Node、Go、Rust 又有不同运行时。
     pytest
 
 ### 第三步：识别高风险 syscall
-
-例如：
 
     mount
     ptrace
@@ -368,8 +360,6 @@ seccomp 不适合直接表达：
 
 第一步：
 
-    strace -f -o trace.log python -c "print('hello')"
-
 观察 Python 启动时的 syscall。
 
 第二步：
@@ -421,7 +411,6 @@ https://man7.org/linux/man-pages/man2/PR_SET_SECCOMP.2const.html
 
 Docker Seccomp:
 https://docs.docker.com/engine/security/seccomp/
-
 
 ## 17. 对应实战代码
 
@@ -484,34 +473,6 @@ https://docs.docker.com/engine/security/seccomp/
     TSYNC
 
 会容易很多。
-
-
-## 19. 线程、继承和参数检查的三个考点
-
-### Filter 是按线程安装的
-
-seccomp filter 作用于调用它的线程。由该线程创建的子进程 / 线程会继承 filter；已经存在的其他线程不一定自动受到影响。多线程程序应在创建线程前安装，或明确使用 TSYNC 同步策略。
-
-### Filter 是随进程继承的
-
-在允许 `fork` / `clone` 的前提下，子进程会继承父进程 filter；`execve` 后 filter 仍然生效。这也是为什么应该在目标程序启动前建立限制。
-
-### 指针参数不能直接作为路径策略
-
-seccomp 可以检查 syscall 参数中的数值，但不能直接检查 `openat` 的 pathname 字符串或 `connect` 的 sockaddr 内容。不要尝试用 seccomp 单独实现“只允许访问 /workspace”或“只允许访问 github.com”。
-
-## 20. 本节代码的实验范围
-
-本仓库 Lab 01 使用 `default = ALLOW`，仅拦截一个明确 syscall，让你观察 Kernel 返回 EPERM。它不是生产级 allowlist，也不是完整 Sandbox。
-
-更重要的是，示例通过 `syscall(SCMP_SYS(mkdir), ...)` 直接调用目标 syscall，避免 libc 包装函数可能选择 `mkdirat` 等实现路径导致实验结果不一致。
-
-## 参考补充
-
-- Seccomp filter：https://www.kernel.org/doc/html/latest/userspace-api/seccomp_filter.html
-- seccomp(2)：https://man7.org/linux/man-pages/man2/seccomp.2.html
-- libseccomp：https://github.com/seccomp/libseccomp
-
 
 ## 19. 线程、继承和参数检查的三个考点
 
