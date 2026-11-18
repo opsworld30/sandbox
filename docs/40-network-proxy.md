@@ -308,3 +308,9 @@ Gateway 可以记录：
     Internet
 
 同时要分别处理 TCP、UDP、IPv6、DNS、Unix Domain Socket 和 host network。仅实现 HTTP CONNECT 不等于控制了所有网络协议。
+
+
+## 参考
+
+- HTTP Semantics — CONNECT method (RFC 9110 §9.3.6)：https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.6
+- Linux Network Namespaces：https://man7.org/linux/man-pages/man7/network_namespaces.7.html
