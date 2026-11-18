@@ -227,3 +227,16 @@ https://openai.com/index/building-codex-windows-sandbox/
 - VS Code Agent Sandbox：https://code.visualstudio.com/docs/agents/run/agent-sandboxing
 
 **核验日期：2026-11-18。** Windows Sandbox 的平台要求、Alpha / Experimental 状态和提权行为可能随产品版本变化。
+
+
+## 12. Windows Sandbox 的共同教训
+
+不同产品都在组合 Windows 身份、ACL、网络过滤和进程管理，但这些机制并不自动形成完整安全边界：
+
+- Restricted Token / Low Integrity Level 是不同的安全机制，不要混为一谈；
+- ACL 的修改可能持久化，必须设计回滚和异常清理；
+- WFP 过滤需要核对实际 socket 创建 Token、代理路径和系统服务代发流量等限制；
+- Job Object 管理进程树，不等于文件和网络隔离；
+- AppContainer、Windows Sandbox VM、BaseContainer、产品自定义 Sandbox 的隔离层次和兼容性不同。
+
+每个实现都应该有明确的 Threat Model、策略验证和 Escape Test；不能因为名称里有 Sandbox 就假设它阻止了所有宿主机访问。
