@@ -1,0 +1,413 @@
+# 第 8 讲：seccomp 到底是什么
+
+> 这一讲专门解决一个问题：为什么“禁止某些 syscall”真的能形成 Sandbox？
+
+## 1. 程序为什么需要 System Call
+
+用户程序不能直接操作 Kernel。
+
+例如读取文件：
+
+    Application
+       ↓
+    libc / runtime
+       ↓
+    openat()
+       ↓
+    Linux Kernel
+       ↓
+    Filesystem
+
+建立网络连接：
+
+    Application
+       ↓
+    socket()
+       ↓
+    connect()
+       ↓
+    Linux Kernel
+       ↓
+    Network Stack
+
+所以 System Call 是：
+
+> 用户态程序请求 Kernel 执行特权操作的正式入口。
+
+## 2. seccomp 是什么
+
+seccomp 是 Secure Computing。
+
+Linux Kernel 提供 seccomp 机制，让进程可以安装一个 filter。
+
+之后进程每次进入 Kernel 发起 system call：
+
+    syscall
+       ↓
+    seccomp filter
+       ↓
+    allow / deny / error / kill / log / notify
+       ↓
+    Kernel
+
+这就是它为什么重要。
+
+## 3. 为什么不是“禁止 Linux 命令”
+
+例如：
+
+    curl https://example.com
+
+curl 只是一个用户态程序。
+
+内部可能调用：
+
+    socket()
+    connect()
+    send()
+    recv()
+    close()
+
+如果 Sandbox 禁止 socket：
+
+    curl
+      ↓
+    socket()
+      ↓
+    Kernel
+      ↓
+    seccomp
+      ↓
+    DENY
+
+所以：
+
+> 不管程序叫 curl、Python、Node 还是自定义二进制，只要它最终调用被过滤的 syscall，就会在 Kernel 入口被拦截。
+
+## 4. seccomp 使用什么过滤器
+
+seccomp filter 使用 BPF。
+
+可以把它想成：
+
+    syscall request
+          ↓
+    ┌────────────────────┐
+    │ BPF filter         │
+    │                    │
+    │ syscall == read ?  │
+    │ syscall == write ? │
+    │ syscall == mount ? │
+    │ syscall == ptrace? │
+    └─────────┬──────────┘
+              ↓
+          decision
+
+Filter 不只可以判断 syscall number，还可以根据 seccomp 提供的 syscall 参数数据做更细的判断。
+
+## 5. 为什么需要它
+
+AI Agent 可以执行任意语言：
+
+    bash
+    python
+    node
+    go
+    rust
+
+你无法靠：
+
+    if command contains "mount"
+
+来保证安全。
+
+因为程序最终可能通过：
+
+    Python
+      ↓
+    native library
+      ↓
+    syscall
+
+真正可靠的边界应该靠 OS / Kernel。
+
+## 6. seccomp 的常见动作
+
+### ALLOW
+
+继续执行 syscall。
+
+### ERRNO
+
+不执行 syscall，直接给程序返回错误。
+
+例如：
+
+    EPERM
+
+### KILL_PROCESS / KILL_THREAD
+
+直接终止。
+
+### TRAP
+
+触发 SIGSYS，用于特殊处理。
+
+### LOG
+
+记录 syscall，同时允许继续执行，适合开发阶段分析程序需要什么 syscall。
+
+### USER_NOTIF
+
+把特定 syscall 请求交给用户态 supervisor。
+
+这个机制很重要，因为它意味着：
+
+    Program
+      ↓
+    Kernel
+      ↓
+    seccomp notification
+      ↓
+    Supervisor
+      ↓
+    allow / deny / respond
+
+这已经开始接近 Policy Engine。
+
+## 7. 为什么不能全部禁止
+
+一个普通程序启动就需要很多 syscall，例如：
+
+    execve
+    openat
+    mmap
+    mprotect
+    read
+    close
+    futex
+    exit_group
+
+Python、Node、Go、Rust 又有不同运行时。
+
+如果 filter 太严格：
+
+    Program
+      ↓
+    startup
+      ↓
+    syscall denied
+      ↓
+    Program crashes
+
+所以 seccomp 最大的工程难点之一是：
+
+> Security 和 Compatibility 的平衡。
+
+## 8. 生产环境怎么建立 syscall policy
+
+推荐流程：
+
+### 第一步：观察
+
+使用 strace 等工具观察程序正常运行需要什么 syscall。
+
+例如：
+
+    strace -f -o trace.log python -c "print('hello')"
+
+注意：
+
+> strace 是观察工具，不是 Sandbox。
+
+### 第二步：建立 baseline
+
+分别观察：
+
+    python
+    node
+    git
+    npm
+    pytest
+
+### 第三步：识别高风险 syscall
+
+例如：
+
+    mount
+    ptrace
+    reboot
+    kexec_load
+    bpf
+    keyctl
+    unshare
+    setns
+
+不要直接复制网上 profile。真正允许什么取决于程序、架构和内核。
+
+## 9. seccomp 什么时候安装
+
+典型模型：
+
+    Parent
+      ↓
+    fork
+      ↓
+    Child
+      ↓
+    no_new_privs
+      ↓
+    install seccomp
+      ↓
+    exec target
+
+目标是：
+
+> Target 从启动开始就处于限制内。
+
+## 10. no_new_privs 为什么经常出现
+
+无特权进程使用 seccomp filter 时需要满足安全条件。
+
+常见模型：
+
+    PR_SET_NO_NEW_PRIVS
+           ↓
+    seccomp filter
+           ↓
+    exec target
+
+no_new_privs 可以防止 exec 过程中通过 setuid / file capabilities 等机制获得新的特权。
+
+## 11. libseccomp
+
+手写 BPF 很容易出错。
+
+实际工程通常可以使用 libseccomp 这样的高层库。
+
+概念代码：
+
+    ctx = seccomp_init(ERRNO(EPERM))
+
+    allow(ctx, read)
+    allow(ctx, write)
+    allow(ctx, close)
+
+    seccomp_load(ctx)
+
+库负责把更容易理解的规则转换成 Kernel 可执行的 filter。
+
+## 12. seccomp 和 Landlock 的区别
+
+这是本课程最重要的对比之一：
+
+| 技术 | 主要问题 |
+|---|---|
+| Namespace | 我能看到什么 |
+| Landlock | 我能对哪些文件/网络资源做什么 |
+| seccomp | 我能向 Kernel 请求什么 |
+| cgroups | 我最多消耗多少资源 |
+| capabilities | 我有哪些特权 |
+| no_new_privs | exec 后不能获得新特权 |
+
+记忆：
+
+> Namespace 看见什么，Landlock 能做什么，seccomp 能调用什么，cgroups 能用多少。
+
+## 13. 为什么 seccomp 不能代替 Filesystem Sandbox
+
+假设允许：
+
+    openat()
+
+那么程序仍然可以请求：
+
+    openat("/home/user/.ssh/id_rsa")
+
+seccomp 不适合直接表达：
+
+> 只允许 /workspace。
+
+所以需要：
+
+    seccomp
+      +
+    Landlock / mount namespace
+
+## 14. 为什么 AI Coding Sandbox 要组合
+
+完整模型：
+
+    AI Agent
+       ↓
+    Sandbox Manager
+       ↓
+    Filesystem Policy → Landlock / namespace
+       ↓
+    Network Policy    → proxy / namespace
+       ↓
+    Syscall Policy    → seccomp
+       ↓
+    Resource Policy   → cgroups
+       ↓
+    Kernel
+
+## 15. 本讲实验
+
+建议在 Linux 测试 VM 中完成。
+
+第一步：
+
+    strace -f -o trace.log python -c "print('hello')"
+
+观察 Python 启动时的 syscall。
+
+第二步：
+
+比较：
+
+    python
+    node
+    git
+
+第三步：
+
+使用一个最小 seccomp 示例，让一个测试 syscall 返回 EPERM。
+
+不要直接在日常工作机上安装未知的严格 filter。
+
+## 16. 这一讲真正应该理解的结论
+
+> seccomp 是 Linux Kernel 提供的 syscall filtering 机制。进程进入 Kernel 请求 system call 时，Kernel 可以依据 filter 决定允许、返回错误、记录、终止或交给用户态 supervisor。
+
+再加一句：
+
+> seccomp 解决的是“进程可以向 Kernel 请求什么”，不是“进程可以访问哪个目录”。
+
+## 面试题
+
+### Q1：为什么 seccomp 比命令黑名单可靠？
+
+因为它工作在 syscall 边界，而不是命令字符串边界。
+
+### Q2：seccomp 能直接限制路径吗？
+
+它不是做路径授权的主要机制。文件路径通常交给 Landlock、mount namespace 等机制。
+
+### Q3：为什么生产环境不能随便复制 seccomp profile？
+
+因为不同程序需要不同 syscall；过严会破坏兼容性，过松又可能扩大攻击面。
+
+## 官方资料
+
+Linux Kernel Seccomp:
+https://kernel.org/doc/html/latest/userspace-api/seccomp_filter.html
+
+seccomp(2):
+https://man7.org/linux/man-pages/man2/seccomp.2.html
+
+PR_SET_SECCOMP:
+https://man7.org/linux/man-pages/man2/PR_SET_SECCOMP.2const.html
+
+Docker Seccomp:
+https://docs.docker.com/engine/security/seccomp/
