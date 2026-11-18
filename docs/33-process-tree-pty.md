@@ -233,3 +233,10 @@ Linux 生产环境可使用 cgroup v2 管理 Session 的进程集合；应在可
 ## 12. PTY 不提供安全隔离
 
 PTY 解决终端交互、控制字符和 TTY 语义；它本身不限制文件、网络、进程或资源。PTY helper、shell 和所有子进程都必须在正确的 Sandbox / cgroup / Job Object 中运行。
+
+
+## 参考
+
+- Linux cgroup v2：https://docs.kernel.org/admin-guide/cgroup-v2.html
+- Linux process control / signals：https://man7.org/linux/man-pages/man2/kill.2.html
+- Windows Job Objects：https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects
