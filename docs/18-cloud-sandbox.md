@@ -177,7 +177,7 @@ Self-hosted：
 
 > 为什么 Session 不应该等同于 Environment？
 
-因为一个 Environment 可以在不同 Session 中复用，而 Session 保存的是 Agent 状态和对话。
+因为 Environment 可以表示可复用的环境配置或预热工作区，而 Session 保存 Agent 状态和对话。但复用的是“配置 / 镜像”还是“同一个可写运行环境”，安全含义完全不同：共享可写 workspace 会让多个 Session 看到彼此的文件、进程和安装状态。只有在明确需要协作、共享状态且信任边界允许时才这样做。
 
 ## 10. 面试题
 
@@ -194,7 +194,7 @@ Self-hosted：
 
 截至 2026-11-18，OpenAI Agents API 的 OpenAI-hosted sandbox 文档描述的是一个 Linux workspace，采用 container 资源规格（small / medium / large），每个 Session 有独立 workspace，文件在 Sandbox 存续期间跨 turns 保留；还可以设置 network access（enabled / disabled / restricted）。
 
-这属于 Agents API 的 OpenAI-hosted sandbox，不能和 Codex Cloud 的所有内部实现简单画等号。产品、API 和不同执行面需要分开描述。
+这属于 Agents API 的 OpenAI-hosted sandbox，不能和 Codex Cloud 的所有内部实现简单画等号。常规 Session 的 workspace 按 Session 隔离；另有 Pre-warm API 创建的共享 Environment 可被多个 Session 附加，附加后的 Session 共享 workspace、文件、进程、已安装包和环境配置（当前文档注明最多 128 个 Session）。需要隔离数据的任务应创建独立 Environment。产品、API 和不同执行面需要分开描述。
 
 参考：
 - OpenAI-hosted sandboxes：https://developers.openai.com/api/docs/guides/agents-api/environments/openai-hosted
