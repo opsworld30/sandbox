@@ -204,3 +204,10 @@ Self-hosted：
 - OpenAI-hosted sandboxes：https://developers.openai.com/api/docs/guides/agents-api/environments/openai-hosted
 - Self-hosted sandboxes：https://developers.openai.com/api/docs/guides/agents-api/environments/self-hosted
 - Sandbox lifecycle：https://developers.openai.com/api/docs/guides/agents-api/environments/lifecycle
+
+## 本讲实验代码
+
+- [Remote Session API](../labs/16-remote-session-api/README.md)
+- [Prewarm / Pool 生命周期](../labs/21-prewarm-pool/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
