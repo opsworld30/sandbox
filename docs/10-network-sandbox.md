@@ -248,3 +248,10 @@ Network Namespace 主要隔离网络栈，不会自动替你隐藏所有 Unix Do
 ## 15. 产品实现要分开核对
 
 例如 Claude Code 的本地 Bash Sandbox 在 Linux / WSL2 使用独立 Network Namespace，并通过本机 Sandbox Proxy 处理允许的域名；macOS 使用 Seatbelt 限制直接连接并允许访问代理。这个实现不能推导成所有 AI Coding 工具都采用相同方案。
+
+## 本讲实验代码
+
+- [Network Namespace 断网实验](../labs/04-bubblewrap/README.md)
+- [Domain Allowlist 策略实验](../labs/06-network-policy/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
