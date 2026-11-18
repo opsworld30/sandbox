@@ -153,7 +153,7 @@
       cpu
       memory
       timeout
-      process_count
+      process_count / task_count
       output_bytes
 
 ## 7. 执行链
@@ -356,7 +356,7 @@ Agent 不可以：
 
 ### 资源 enforcement
 
-- Linux CPU / Memory / PIDs：使用 cgroup v2 等 OS 资源控制；
+- Linux CPU / Memory / PIDs：使用 cgroup v2 等 OS 资源控制；其中 `pids.max` 统计 tasks（线程也计入），不只是传统进程数；
 - 磁盘容量：使用文件系统 quota / 独立受限 volume；cgroup `io` 主要控制 I/O 资源，不等同磁盘空间配额；
 - stdout / stderr：在流式收集时计数并截断或终止，不能先完整缓存在内存再检查；
 - timeout / destroy：终止整个 Session 进程集合，而不是只 kill 父 PID。
