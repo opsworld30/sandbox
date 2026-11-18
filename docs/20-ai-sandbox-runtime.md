@@ -305,3 +305,9 @@ Policy 表达“想允许什么”，Backend 表达“在当前平台如何真�
 - File API 需要处理 symlink、路径穿越、FD 和并发替换问题。
 - Destroy 必须清理整个进程集合、临时网络和临时凭证。
 - Audit 要区分“Policy 决策事件”和“真实 OS 访问事件”；后者只有在相应审计 / tracing 能力启用时才可完整观测。
+
+## 本讲实验代码
+
+- [Mini AI Sandbox Runtime](../labs/17-mini-runtime/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
