@@ -1,0 +1,22 @@
+(version 1)
+
+(deny default)
+
+(allow process-exec)
+(allow process-fork)
+(allow signal (target self))
+(allow sysctl-read)
+
+(allow file-read*
+  (subpath "/System")
+  (subpath "/usr")
+  (subpath "/bin")
+  (subpath "/sbin")
+  (subpath "/Library/Apple/System/Library")
+  (subpath "/private/var/db/dyld")
+  (subpath (param "WORKSPACE"))
+)
+
+(allow file-write*
+  (subpath (param "WORKSPACE"))
+)
