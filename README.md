@@ -85,11 +85,13 @@ AI Agent 最终会执行：
 35. Browser Agent Sandbox
 36. Threat Model：从“防攻击”推导 Sandbox Policy
 
-### 第七阶段：建议继续扩展
+### 第七阶段：Sandbox Runtime 深入
 37. Policy Engine：规则语言与 Effective Policy
 38. Sandbox Escape：常见绕过面与防御
 39. Resource Isolation：cgroups、rlimit、IO、fork bomb
 40. Network Proxy：HTTP CONNECT、DNS、Egress Gateway
+
+### 第八阶段：继续深入
 41. Tool Capability Model：Shell / MCP / Browser / LSP 分权
 42. Workspace Snapshot：Checkpoint、Rollback、Copy-on-write
 43. Multi-Agent Isolation：Agent-to-Agent 边界
@@ -103,7 +105,7 @@ AI Agent 最终会执行：
 51. Escape Challenge：构建自己的 Sandbox CTF
 52. Production Architecture：多租户 AI Sandbox 平台
 
-> 37-52 是下一阶段扩展路线。目标是把课程从“认识 Sandbox”推进到“能够设计和实现一个生产级 AI Agent Runtime”。
+> 目前已经从“认识 Sandbox”推进到“理解主流 AI Coding 产品的 Sandbox，再到 Policy / Escape / Resource / Network Runtime”。后续继续把它做成一套可以真正实现生产级 AI Agent Runtime 的课程。
 
 ## 主流 AI Coding 产品的学习地图
 
