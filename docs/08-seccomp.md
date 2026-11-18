@@ -103,7 +103,9 @@ seccomp filter 使用 BPF。
               ↓
           decision
 
-Filter 不只可以判断 syscall number，还可以根据 seccomp 提供的 syscall 参数数据做更细的判断。
+Filter 不只可以判断 syscall number，还可以检查 seccomp 提供的原始参数值（例如整数、flags、fd、socket family 等）。
+
+**关键限制：** syscall 参数中的指针只是用户态地址。seccomp BPF 不能像普通程序一样安全地解引用指针内容。因此它不能直接读取 `openat("/workspace/a")` 中的路径字符串，也不能直接解析 `connect()` 指向的 sockaddr 并按域名做白名单。文件路径应该交给 Landlock / mount namespace 等机制，网络目的地应该交给 Network Namespace、Firewall 或强制 Proxy。
 
 ## 5. 为什么需要它
 
@@ -155,11 +157,11 @@ AI Agent 可以执行任意语言：
 
 ### LOG
 
-记录 syscall，同时允许继续执行，适合开发阶段分析程序需要什么 syscall。
+记录 syscall，同时允许继续执行。它不是拒绝动作；被标记的 syscall 仍会执行。该动作是否可用、日志是否实际写入，取决于 Kernel 版本、配置和审计设置。可用 `SECCOMP_GET_ACTION_AVAIL` 检查动作支持情况。
 
 ### USER_NOTIF
 
-把特定 syscall 请求交给用户态 supervisor。
+把特定 syscall 请求通知用户态 supervisor。
 
 这个机制很重要，因为它意味着：
 
@@ -174,6 +176,8 @@ AI Agent 可以执行任意语言：
     allow / deny / respond
 
 这已经开始接近 Policy Engine。
+
+但 USER_NOTIF 不是“把任意 syscall 安全搬到用户态执行”的通用机制。特别是涉及用户态指针、文件路径、文件描述符和 TOCTOU 的请求，supervisor 必须谨慎处理；不要把收到通知后直接代替目标进程执行操作当成安全设计。
 
 ## 7. 为什么不能全部禁止
 
@@ -247,7 +251,7 @@ Python、Node、Go、Rust 又有不同运行时。
 
 ## 9. seccomp 什么时候安装
 
-典型模型：
+常见的启动模型：
 
     Parent
       ↓
@@ -257,17 +261,19 @@ Python、Node、Go、Rust 又有不同运行时。
       ↓
     no_new_privs
       ↓
-    install seccomp
+    install seccomp filter
       ↓
     exec target
 
-目标是：
+注意三件事：
 
-> Target 从启动开始就处于限制内。
+1. 如果在 `exec target` 之前安装 filter，filter 必须允许启动目标程序所需的 `execve` / `execveat`；否则目标根本启动不了。
+2. filter 默认安装在调用它的线程上。新创建的子进程 / 线程会继承限制，但已经存在的其他线程不会自动全部被同步限制。
+3. 如果要同步限制一个多线程进程的现有线程，需要研究 libseccomp 的 TSYNC 属性 / Kernel 对应能力；更简单可靠的设计通常是在创建工作线程前安装 filter。
 
 ## 10. no_new_privs 为什么经常出现
 
-无特权进程使用 seccomp filter 时需要满足安全条件。
+无特权进程安装 seccomp filter 时，通常需要先设置 `no_new_privs`，除非调用者具备相应 namespace 中的 `CAP_SYS_ADMIN`。
 
 常见模型：
 
@@ -296,6 +302,8 @@ no_new_privs 可以防止 exec 过程中通过 setuid / file capabilities 等机
     seccomp_load(ctx)
 
 库负责把更容易理解的规则转换成 Kernel 可执行的 filter。
+
+补充：seccomp 的默认动作和允许规则必须结合目标程序启动流程设计。不要为了“默认拒绝”而漏掉运行时需要的 syscall；也不要把一个 Python profile 当成 Node、Git、编译器都能安全复用的通用 profile。
 
 ## 12. seccomp 和 Landlock 的区别
 
@@ -474,3 +482,30 @@ https://docs.docker.com/engine/security/seccomp/
     TSYNC
 
 会容易很多。
+
+
+## 19. 线程、继承和参数检查的三个考点
+
+### Filter 是按线程安装的
+
+seccomp filter 作用于调用它的线程。由该线程创建的子进程 / 线程会继承 filter；已经存在的其他线程不一定自动受到影响。多线程程序应在创建线程前安装，或明确使用 TSYNC 同步策略。
+
+### Filter 是随进程继承的
+
+在允许 `fork` / `clone` 的前提下，子进程会继承父进程 filter；`execve` 后 filter 仍然生效。这也是为什么应该在目标程序启动前建立限制。
+
+### 指针参数不能直接作为路径策略
+
+seccomp 可以检查 syscall 参数中的数值，但不能直接检查 `openat` 的 pathname 字符串或 `connect` 的 sockaddr 内容。不要尝试用 seccomp 单独实现“只允许访问 /workspace”或“只允许访问 github.com”。
+
+## 20. 本节代码的实验范围
+
+本仓库 Lab 01 使用 `default = ALLOW`，仅拦截一个明确 syscall，让你观察 Kernel 返回 EPERM。它不是生产级 allowlist，也不是完整 Sandbox。
+
+更重要的是，示例通过 `syscall(SCMP_SYS(mkdir), ...)` 直接调用目标 syscall，避免 libc 包装函数可能选择 `mkdirat` 等实现路径导致实验结果不一致。
+
+## 参考补充
+
+- Seccomp filter：https://www.kernel.org/doc/html/latest/userspace-api/seccomp_filter.html
+- seccomp(2)：https://man7.org/linux/man-pages/man2/seccomp.2.html
+- libseccomp：https://github.com/seccomp/libseccomp
