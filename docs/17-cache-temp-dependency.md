@@ -48,17 +48,15 @@ Agent B：
     Per-project cache
     Per-session cache
 
-安全等级通常：
+这不是固定的安全等级排序。真正决定风险的是：
 
-    shared
-      ↓
-    user
-      ↓
-    project
-      ↓
-    session
+- 谁可以读取和写入；
+- 是否跨 Tenant 共享；
+- 基础 Cache 是否不可变；
+- 写入能否影响其他 Session 后续执行；
+- artifact 是否做来源、完整性和版本校验。
 
-越靠后隔离越强，成本也越高。
+通常可以把**共享只读基础 Cache**与**Session 可写 Cache**分开；但不能只凭 Global / User / Project / Session 的名字判断安全强弱。
 
 ## 4. Cache Poisoning
 
@@ -125,7 +123,7 @@ AI Agent 经常执行：
 - **npm**：依赖包可以声明 `preinstall`、`install`、`postinstall` 等 lifecycle scripts，安装时可能执行代码。
 - **Python / pip**：从 source distribution 构建时，PEP 517 build backend 会运行构建代码；安装预构建 wheel 与构建 source distribution 的执行路径不同，不能说每个 wheel 安装都会运行任意安装脚本。
 - **Rust / Cargo**：`cargo build` 可能执行依赖包的 `build.rs`；`cargo fetch` 与 build 的执行语义不同。
-- **Go**：模块下载通常不执行模块的构建脚本，但后续编译、测试或工具调用仍会执行代码。
+- **Go**：模块下载通常不执行模块包里的构建脚本；Go 编译通常是编译而非运行包代码，但 `go test`、`go generate`、cgo 工具链以及显式调用的生成器 / 构建工具可能执行程序或脚本。
 
 正确结论不是“所有 install 都必然执行任意脚本”，而是：依赖获取、构建和测试链路中存在不可信代码执行点，应在 Sandbox 中运行，并限制网络、文件、凭证和资源。
 
