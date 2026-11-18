@@ -94,12 +94,18 @@ SSH 解决：
 
 Worker Host 可以是 VM、物理机或集群节点；Container 是一种 workload packaging / isolation 方式；gVisor 是可作为容器运行时使用的用户态 Kernel sandbox（例如 runsc），MicroVM 则由 VMM / Hypervisor 启动。不要把 gVisor 直接写成 Worker Host 类型。
 
-Worker 可以：
+Worker workload 可以运行在：
 
-    VM
-    MicroVM
+    VM / MicroVM
+      └── guest OS / workload
+
     Container
+      └── container runtime
+
     gVisor
+      └── runsc runtime，作为容器运行时 / 用户态 Kernel sandbox
+
+gVisor 不是 Worker Host 的机器类型；它是可用于运行容器工作负载的隔离运行时。
 
 ## 6. Multi-tenancy
 
@@ -156,21 +162,16 @@ Data Plane：
 
     control plane credentials
 
-## 8. Session Token
+## 8. Session Token 与 Credential Broker
 
 例如：
 
     session_id
-    capability
+    audience
+    capability scope
     expiry
 
-Sandbox：
-
-    only receives scoped token
-
-而不是：
-
-    cloud master credential
+Session 可以拿到范围受限的会话凭证，但如果 Token 对 Agent 进程可读，它仍然是 Agent 可外传的 Secret。若目标是让 Agent 根本拿不到真实云凭证，应由可信 Broker / Proxy 验证 Session capability 并代为执行操作，而不是把云平台主凭证或可直接调用云 API 的长期 Token 注入 Sandbox。
 
 ## 9. Remote Artifact
 
