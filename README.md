@@ -281,22 +281,31 @@ https://code.visualstudio.com/docs/agents/run/agent-sandboxing
 
 ## Hands-on Labs
 
-- Lab 01：seccomp 最小实验
-  - [实验说明](labs/01-seccomp/README.md)
-  - [C 代码](labs/01-seccomp/seccomp_demo.c)
-  - [Makefile](labs/01-seccomp/Makefile)
+本课程目前提供 **23 个独立实验目录**，不再只保留实验思路或伪代码。每个 Lab 都包含源码或配置、运行步骤、预期结果与安全边界说明。
 
-- Lab 02：Landlock 文件系统隔离
-  - [实验说明](labs/02-landlock/README.md)
-  - [C 代码](labs/02-landlock/landlock_demo.c)
-  - [Makefile](labs/02-landlock/Makefile)
+- [完整实验目录与 44 讲映射](labs/README.md)
+- [Lab 01：seccomp](labs/01-seccomp/README.md)
+- [Lab 02：Landlock](labs/02-landlock/README.md)
+- [Lab 03：Runner / Session](labs/03-runner-session/README.md)
+- [Lab 04：bubblewrap](labs/04-bubblewrap/README.md)
+- [Lab 05：macOS Seatbelt](labs/05-macos-seatbelt/README.md)
+- [Lab 06：Network Egress Policy](labs/06-network-policy/README.md)
+- [Lab 07：Credential Broker](labs/07-credential-broker/README.md)
+- [Lab 08：Policy Engine](labs/08-policy-engine/README.md)
+- [Lab 09：Process Tree](labs/09-process-tree/README.md)
+- [Lab 10：Supply Chain](labs/10-supply-chain/README.md)
+- [Lab 11：Git Worktree / Snapshot](labs/11-worktree-snapshot/README.md)
+- [Lab 12：Audit / Redaction](labs/12-audit-events/README.md)
+- [Lab 13：Multi-Agent Workspace](labs/13-multi-agent-workspaces/README.md)
+- [Lab 14：Resource Limits](labs/14-resource-limits/README.md)
+- [Lab 15：Tool Capabilities](labs/15-tool-capabilities/README.md)
+- [Lab 16：Remote Session API](labs/16-remote-session-api/README.md)
+- [Lab 17：Mini AI Sandbox Runtime](labs/17-mini-runtime/README.md)
+- [Lab 18：Security Regression](labs/18-security-regression/README.md)
+- [Lab 19：Command-scoped Expansion](labs/19-command-expansion/README.md)
+- [Lab 20：Windows Sandbox](labs/20-windows-sandbox/README.md)
+- [Lab 21：Prewarm / Pool](labs/21-prewarm-pool/README.md)
+- [Lab 22：MCP stdio Server](labs/22-mcp-stdio/README.md)
+- [Lab 23：Cache Isolation](labs/23-cache-isolation/README.md)
 
-下一轮待补充的实战：
-
-- bubblewrap 最小可运行实验；
-- Network Namespace + forced proxy 实验；
-- Workspace / symlink / inherited FD 边界实验；
-- Credential Broker fake service；
-- Process Tree + cgroup v2 清理实验；
-- Prompt Injection + Sandbox 验证；
-- Mini AI Sandbox Runtime 综合项目。
+注意：策略模拟、应用层原型和真正调用 OS / Kernel 的实验会明确区分；代码已提交不等于已经在所有操作系统和 Kernel 版本上完成实机验证。
