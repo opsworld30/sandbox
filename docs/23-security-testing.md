@@ -182,3 +182,9 @@ Prompt Injection 评测是概率性测试，不能把“模型这次没有尝试
 - **Backend Failure Test**：bwrap、Landlock、seccomp 或网络策略初始化失败时是否拒绝执行。
 
 安全测试应有可重复的预期结果和日志证据，不能只凭人工观察“好像被挡住了”。
+
+## 本讲实验代码
+
+- [Security Regression Matrix](../labs/18-security-regression/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
