@@ -127,7 +127,7 @@
 ### Lab 01：seccomp
 
 - 已做代码静态审查；
-- 将目标调用改为直接执行 `syscall(SCMP_SYS(mkdir), ...)`，避免 libc wrapper 可能选择不同 syscall 的歧义；
+- 将目标调用改为直接执行 `syscall(SCMP_SYS(mkdirat), AT_FDCWD, ...)`，避免 libc wrapper 可能选择不同 syscall 的歧义；
 - 当前审查环境没有安装 `libseccomp-dev` 头文件，因此本轮没有完成编译和运行验证；
 - 需要在安装了 libseccomp 开发包、Kernel 启用 seccomp filter 的 Linux 主机上运行，并验证 EPERM / audit 日志。
 
