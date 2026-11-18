@@ -234,7 +234,9 @@ https://docs.kernel.org/userspace-api/landlock.html
 
 ## 11. Landlock 规则不是“自动拒绝一切未列出的行为”
 
-Landlock ruleset 创建时必须明确声明哪些 access rights 由该 ruleset 接管（`handled_access_fs`）。只有被标记为 handled 的访问类型，才会按照 Landlock 规则被拒绝或允许；没有被声明为 handled 的类型仍按其他传统权限检查处理。
+Landlock ruleset 创建时必须明确声明哪些 access rights 由该 ruleset 接管（`handled_access_fs`）。一般来说，只有被标记为 handled 的访问类型，才会按照 Landlock 规则被拒绝或允许；没有被声明为 handled 的类型仍按其他传统权限检查处理。
+
+有一个重要例外：`LANDLOCK_ACCESS_FS_REFER`（跨目录 reparent / link / rename）在未显式处理时也有默认拒绝行为；ABI v1 还会默认阻止跨目录 reparent。不要把“未列入 handled 就一定允许”当成普遍规则。
 
 因此生产策略要：
 
@@ -246,7 +248,7 @@ Landlock ruleset 创建时必须明确声明哪些 access rights 由该 ruleset 
 
 ## 12. 已打开 FD 与路径授权不是同一个问题
 
-Landlock 对通过路径打开和通过已有 FD 访问的对象有细致规则；在进入 Sandbox 前已经打开的文件描述符可能保留原有访问能力，或在后续操作时受到不同的检查。
+Landlock 文件系统访问限制不会追溯作用于进入 Sandbox 前已经打开的文件 / 目录 FD。打开时获得的 FD 可能继续提供原先的访问能力；对于 `TRUNCATE` 和设备 `IOCTL`，相关权限也会与打开时创建的 FD 关联。FD 还可以通过 Unix socket 等机制传递给其他进程。
 
 所以 Runtime 应在进入 Sandbox 前：
 
@@ -292,3 +294,10 @@ Landlock 对通过路径打开和通过已有 FD 访问的对象有细致规则�
 路径规范化和 `realpath()` 检查不能单独防住所有文件系统竞态。文件可能在检查后、打开前被替换；硬链接也意味着不同路径可能指向同一个 inode。
 
 在 Linux 上应结合 Landlock 的 `REFER` 权限、适当的路径解析约束（例如 `openat2` 的 resolve flags）和基于 FD 的操作设计。不要只用字符串前缀判断路径是否位于 workspace。
+
+
+## 14. 线程同步与 no_new_privs
+
+Landlock 默认通过 `landlock_restrict_self()` 限制调用线程及其后代。ABI v8 起可以通过 `LANDLOCK_RESTRICT_SELF_TSYNC` 把规则原子地同步应用到当前进程的所有线程。
+
+无特权进程通常需要先设置 `PR_SET_NO_NEW_PRIVS` 才能 enforce Landlock；ABI v11 起也可以使用 `LANDLOCK_RESTRICT_SELF_NO_NEW_PRIVS`，由 `restrict_self` 在成功时设置该属性。具体调用应按运行中 ABI 和目标线程模型实现。
