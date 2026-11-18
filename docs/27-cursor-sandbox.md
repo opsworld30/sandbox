@@ -278,7 +278,7 @@ Cursor 的 Sandbox 默认阻止任意网络访问；网络模式可选择仅使�
 
 ## 14. Read Access 默认值也会影响实际边界
 
-Cursor 当前 Read Access 的默认模式是 `System`，Agent 可以读取 Workspace 外的文件而无需先请求批准。若要把读取范围收窄到项目，需要选择 `Workspace` 并配置 Read Allowlist。
+Cursor 当前 Read Access 的默认模式是 `System`，Agent 不会被强制限制在当前 Workspace；在宿主 OS 权限和产品保护路径允许的范围内，读取 Workspace 外文件可能无需先请求批准。若要把读取范围收窄到项目，需要选择 `Workspace` 并配置 Read Allowlist。
 
 因此要分开理解：
 
