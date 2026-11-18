@@ -170,3 +170,9 @@ https://github.com/openai/codex/blob/main/codex-rs/sandboxing/src/seatbelt.rs
 ## 参考补充
 
 Apple Platform Security：https://support.apple.com/guide/security/welcome/web
+
+## 本讲实验代码
+
+- [Seatbelt 文件访问实验](../labs/05-macos-seatbelt/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
