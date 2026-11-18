@@ -81,25 +81,43 @@ Claude Code 的公开设计把两个边界放在一起：
 
 两个都要限制。
 
-## 4. Claude 的 OS-level Runtime
+## 4. 必须区分 Claude Code 产品 Sandbox 与独立 sandbox-runtime
 
-公开的 sandbox-runtime 项目使用：
+### Claude Code 本地 Bash Sandbox（产品行为）
+
+截至 2026-11-18，Claude Code 官方文档描述的本地 Bash Sandbox 平台路径为：
 
     macOS
-      → sandbox-exec / Seatbelt
+      → Seatbelt
+
+    Linux / WSL2
+      → bubblewrap
+      → 独立 Network Namespace
+      → 本机 Sandbox Proxy
+      → 可选 seccomp filter
+
+Native Windows 不提供 Claude Code Bash Sandbox；Windows 用户需要通过 WSL2 或容器使用支持的 Linux 环境。
+
+**产品覆盖范围：** 该 Sandbox 主要限制 Claude Code 的 Bash 命令及其子进程。官方文档明确说明，File tools、MCP servers、hooks 等并不自动处于同一个 Bash Sandbox 内。不能因为 Bash 被 Sandbox，就认为整个 Claude Code 进程、所有 MCP 或所有工具都自动受同一边界保护。
+
+### Anthropic 独立的 sandbox-runtime 项目
+
+这是另一个开源工具，目标是对任意进程施加文件和网络限制：
+
+    macOS
+      → sandbox-exec / Seatbelt profile
 
     Linux
       → bubblewrap + network namespace
 
     Windows
-      → dedicated local user
-      → Windows Filtering Platform
+      → Alpha implementation
+      → dedicated srt-sandbox local user
+      → WFP egress fence
       → write-restricted token
-      → ACL
+      → filesystem ACEs
 
-这就是一个非常好的学习案例：
-
-> 不要求所有平台使用同一种技术，而是保持统一的 Sandbox API。
+Windows 这一项属于独立 sandbox-runtime 的 Alpha 实现，不是 Claude Code 原生 Windows Bash Sandbox。
 
 ## 5. 为什么“无容器”也可以 Sandbox
 
@@ -191,9 +209,11 @@ Agent 一旦被攻击：
        ↓
     git proxy
        ↓
-    short-lived / scoped credential
+    proxy attaches credential server-side
        ↓
     GitHub
+
+如果 Proxy 把 Token 返回给 Sandbox，Token 仍然是 Agent 可读取的 Secret。代理式访问的关键是凭证留在 Broker / Proxy 端。
 
 ## 9. 实验
 
