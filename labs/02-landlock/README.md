@@ -15,7 +15,7 @@ Linux 测试 VM。
     sudo apt-get update
     sudo apt-get install build-essential
 
-较新的 Linux Kernel 和内核头文件需要支持 Landlock。
+需要启用 Landlock 的 Linux Kernel，以及包含 Landlock UAPI 定义的内核头文件。程序会先查询运行中 Kernel 的 Landlock ABI 版本；如果内核不支持或未启用 Landlock，会明确报错退出。
 
 ## 准备
 
@@ -41,13 +41,15 @@ Linux 测试 VM。
 预期：
 
     workspace/hello.txt
-      → allow
+      → allow read
 
-    ../secret.txt
-      → deny
+    secret.txt
+      → deny read
 
     workspace/created.txt
-      → allow write
+      → allow create + write
+
+本实验只验证代码中明确列入 `handled_access_fs` 的权限。Landlock 的规则集只会拒绝被标记为 handled 的访问类型；没有列入的权限不会自动变成 deny。因此它仍然不是完整的生产级文件系统策略。
 
 ## 这个实验和 seccomp 的区别
 
@@ -91,7 +93,9 @@ Landlock：
 
 一旦 restrict_self 成功：
 
-> 当前线程进入 Landlock domain，后续创建的 child 也会受到这个限制。
+> 调用线程进入 Landlock domain；之后由它创建的子进程/线程会继承限制。
+
+注意：`landlock_restrict_self()` 不会自动追溯限制已经存在的其他线程。实际程序应在创建工作线程之前安装策略，或确保所有需要保护的线程都分别处于正确的 Landlock domain。
 
 ## 注意
 
@@ -99,11 +103,13 @@ Landlock：
 
 生产环境还需要考虑：
 
-- symlink；
-- inherited FD；
-- network；
-- process tree；
-- syscall；
-- resource；
-- credentials；
-- kernel compatibility。
+- 按运行中 Kernel ABI 协商支持的访问权限；
+- `REFER`、`TRUNCATE` 等不同 ABI 才提供的权限；
+- symlink、hardlink、路径解析与 TOCTOU；
+- 在进入 domain 前打开的 FD，以及继承/传递的 FD；
+- 线程和子进程的继承关系；
+- network（Landlock 的网络规则是端口级，不是域名白名单）；
+- syscall、资源、凭证和 Unix socket；
+- Kernel / headers 版本兼容性。
+
+Landlock 是附加限制层，不会授予进程原本没有的权限。
