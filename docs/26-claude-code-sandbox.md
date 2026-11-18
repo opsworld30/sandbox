@@ -151,29 +151,23 @@ Claude Code 的本地 Runtime 证明了：
        +
     限制宿主机能力
 
-## 7. Git Proxy 是另一种重要思路
+## 7. Cloud Session 的 GitHub Proxy 是另一种重要思路
 
-Claude Code Web 的公开资料还展示了一种非常值得学习的设计：
+Claude Code Cloud Session 的公开资料说明：在 Anthropic-hosted environment 中，GitHub 凭证保存在 Anthropic 服务端并加密，Session VM 不直接拿到真实 GitHub credential；VM 发起 Git 操作时由服务端 GitHub Proxy 代为附加凭证。
 
-    Git
-      ↓
-    Custom Proxy
-      ↓
-    Validate credential
-      ↓
-    Validate repository / branch
-      ↓
-    Attach real credential
-      ↓
+概念：
+
+    Cloud Session VM
+       ↓
+    Git operation
+       ↓
+    GitHub Proxy
+       ↓
+    attach credential server-side
+       ↓
     GitHub
 
-重点：
-
-> 不把高价值 Git Credential 直接暴露给 Sandbox。
-
-这叫：
-
-> Credential Isolation / Credential Mediation
+这里可以确认的是 Credential Mediation：真实凭证留在 VM 外部。不要在没有对应技术文档的情况下，额外声称 Proxy 一定会按 branch / commit 做某种特定校验。
 
 ## 8. 这比“把 token 放环境变量”高级很多
 
@@ -226,29 +220,49 @@ Proxy 检查：
 
 ## 10. 这一讲的核心
 
-Claude Code 案例告诉你：
+Claude Code 本地 Bash Sandbox 展示的是：
 
-    Sandbox
-      =
-    Filesystem Boundary
+    Bash process tree
       +
-    Network Boundary
+    Filesystem isolation
       +
-    Process Boundary
+    Network isolation
       +
-    Credential Boundary
+    Permission / fallback controls
 
-而不是：
+但 Claude Code 的 File tools、MCP servers、hooks 不应被默认视为已包含在同一个 Bash Sandbox 内。
 
-    Sandbox = Docker
+Anthropic Cloud Session 则展示：
+
+    isolated VM per session
+      +
+    network access controls
+      +
+    server-side credential proxy
+
+而独立 sandbox-runtime 是另一个可研究的跨平台进程 Sandbox 项目。
+
+三者必须分开讲，不能混成一个“Claude Code Sandbox 实现”。
 
 ## 参考
 
-Anthropic sandboxing:
-https://www.anthropic.com/research/claude-code-sandboxing
+Claude Code Sandbox:
+https://code.claude.com/docs/en/sandboxing
+
+Claude Code Security:
+https://code.claude.com/docs/en/security
 
 Anthropic sandbox-runtime:
 https://github.com/anthropics/sandbox-runtime
 
-How Anthropic contains Claude:
-https://www.anthropic.com/research/how-we-contain-claude
+Claude Code Cloud Sessions:
+https://code.claude.com/docs/en/claude-code-on-the-web
+
+**核验日期：2026-11-18。** 产品平台支持与独立 sandbox-runtime 的平台支持是两个不同问题。
+
+
+## 11. 关于网络限制的补充
+
+Claude Code Linux / WSL2 Sandbox 会把命令放入独立 Network Namespace，并通过本机 Sandbox Proxy 处理允许的域名。能否联网取决于工具是否遵守 Proxy 环境变量；直接 SSH、UDP / QUIC、ICMP 等流量不等于自动获得允许。macOS 则通过 Seatbelt 阻止除代理路径外的直接网络连接。
+
+因此 Proxy 的 allowlist 和 OS-level network enforcement 必须组合；单独注入 `HTTP_PROXY` 环境变量不是安全边界。
