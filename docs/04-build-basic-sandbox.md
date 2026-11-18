@@ -132,3 +132,10 @@ subprocess.run(argv, timeout=10)
 3. Session 销毁后是否还残留后台进程、端口或文件句柄。
 
 生产 Runtime 应给每个 Session 建立可整体清理的进程边界（例如 Linux cgroup v2 / Windows Job Object），并在 destroy 后验证没有残留进程。
+
+## 本讲实验代码
+
+- [Runner 与 Session 生命周期](../labs/03-runner-session/README.md)
+- [Mini Runtime](../labs/17-mini-runtime/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
