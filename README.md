@@ -110,6 +110,11 @@ https://code.visualstudio.com/docs/agents/run/agent-sandboxing
   - [C 代码](labs/01-seccomp/seccomp_demo.c)
   - [Makefile](labs/01-seccomp/Makefile)
 
+- Lab 02：Landlock 文件系统隔离
+  - [实验说明](labs/02-landlock/README.md)
+  - [C 代码](labs/02-landlock/landlock_demo.c)
+  - [Makefile](labs/02-landlock/Makefile)
+
 后续会继续补充：
 
 - Landlock 实验；
