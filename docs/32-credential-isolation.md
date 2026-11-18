@@ -36,14 +36,17 @@
 
     Agent Sandbox
        |
-       | no long-lived secret
+       | operation request only
        |
        ↓
-    Credential Broker
+    Credential Broker / Proxy
        ↓
-    short-lived credential
+    attach secret server-side
        ↓
     target service
+       |
+       ↓
+    return operation result (not secret)
 
 ## 3. 为什么 Proxy 是好办法
 
@@ -156,21 +159,23 @@ Broker 验证：
 
     sandbox
        ↓
-    requestCredential("github")
+    requestGitOperation("push", repo, branch)
        ↓
     broker
        ↓
-    validate(session)
+    validate(session + repo + branch)
        ↓
-    return fake scoped token
+    broker performs fake operation
+       ↓
+    return { ok: true }
 
 测试：
 
-    sandbox 能不能 print token？
+    sandbox 能不能 print the fake token？
 
 目标：
 
-    NO
+    sandbox 从未收到 token，因此无 token 可打印。
 
 ## 9. 核心结论
 
@@ -185,3 +190,11 @@ Broker 验证：
     Database Credential
 
 全部成立。
+
+
+## 10. 一个容易混淆的安全结论
+
+- **Broker 返回短期 Token**：降低泄露后的权限和时间窗口，但 Token 已经进入不可信执行环境。
+- **Broker / Proxy 代为执行操作**：可以让真实凭证始终留在可信服务端，只向 Agent 返回操作结果。
+
+如果设计目标是“Agent 根本拿不到真实凭证”，必须使用第二种模式，或确保凭证只被可信 helper 消费、且 Agent 无法读取其进程内存、FD 或 IPC payload。
