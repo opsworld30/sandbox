@@ -88,7 +88,7 @@ Linux 可以结合：
     RLIMIT_NPROC
     PID namespace
 
-不同机制解决的问题不同。注意 `RLIMIT_NPROC` 通常按 real UID 统计进程 / 线程数，不是天然的 per-Session 限额；多个 Sandbox 共用 UID 时，使用 cgroup pids controller 通常更适合做 Session 级限制。
+不同机制解决的问题不同。cgroup v2 的 `pids.max` 限制的是 cgroup 中的 tasks 数量（线程也计入），不只是传统意义上的进程数。注意 `RLIMIT_NPROC` 通常按 real UID 统计进程 / 线程数，不是天然的 per-Session 限额；多个 Sandbox 共用 UID 时，使用 cgroup pids controller 通常更适合做 Session 级限制。
 
 ## 5. Memory
 
@@ -282,7 +282,7 @@ seccomp 控制 syscall 能力，cgroups 控制资源消耗。一个限制“能�
 |---|---|---|
 | CPU 配额 | cgroup `cpu.max` | 限制一组进程的 CPU 使用比例 |
 | 内存上限 | cgroup `memory.max` | 限制 cgroup 内存使用 |
-| 进程数量 | cgroup `pids.max` | 比共享 UID 下的 RLIMIT_NPROC 更适合 per-session |
+| 进程 / task 数量 | cgroup `pids.max` | 限制 cgroup 中的 tasks（包含线程）；比共享 UID 下的 RLIMIT_NPROC 更适合 per-session |
 | I/O 限制 | cgroup `io.max` / `io.weight` | 控制 I/O 速率或权重，不是磁盘容量 |
 | 单文件大小 | `RLIMIT_FSIZE` | 限制单个文件可创建的最大大小 |
 | 文件描述符 | `RLIMIT_NOFILE` | 限制进程可打开 FD 数量 |
