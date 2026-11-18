@@ -374,3 +374,10 @@ Agent 不可以：
 ## 14. 本项目不应宣称的内容
 
 完成这个 Mini Runtime 不代表已经实现生产级多租户安全。至少还需要独立的安全评估、逃逸测试、Kernel / VMM 攻击面审查、镜像供应链验证、并发和租户隔离测试，以及持续补丁管理。
+
+## 本讲实验代码
+
+- [Mini AI Coding Sandbox Runtime](../labs/17-mini-runtime/README.md)
+- [安全回归测试](../labs/18-security-regression/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
