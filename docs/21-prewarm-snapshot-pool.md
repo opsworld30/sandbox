@@ -236,3 +236,10 @@ OpenAI Agents API 当前提供两种需要区分的情况：
 这些是 OpenAI 当前 API 的具体生命周期规则，不是所有 Sandbox Pool 的通用默认值。旧版 Environment 可能仍保持单 Session 生命周期。
 
 参考：https://developers.openai.com/api/docs/guides/agents-api/environments/prewarmed
+
+## 本讲实验代码
+
+- [Git Worktree Snapshot](../labs/11-worktree-snapshot/README.md)
+- [Prewarm / Snapshot / Pool 状态机](../labs/21-prewarm-pool/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
