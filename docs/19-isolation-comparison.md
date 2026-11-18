@@ -226,3 +226,11 @@ OS Sandbox 很合适。
 6. 失败时是否 fail-closed，还是允许绕过到宿主机执行？
 
 只有回答这些问题，才能有依据地选择 OS Sandbox、Container、MicroVM 或 VM。
+
+## 本讲实验代码
+
+- [Linux bubblewrap](../labs/04-bubblewrap/README.md)
+- [macOS Seatbelt](../labs/05-macos-seatbelt/README.md)
+- [Windows Sandbox VM](../labs/20-windows-sandbox/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
