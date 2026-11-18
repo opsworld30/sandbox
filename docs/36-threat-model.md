@@ -248,3 +248,9 @@
 - 攻击者能力上限：能否执行任意 native code、能否创建子进程、能否访问网络、能否调用 IPC。
 
 没有这些假设，“安全”或“高隔离”都没有可验证的含义。
+
+## 本讲实验代码
+
+- [Threat Model 驱动的测试矩阵](../labs/18-security-regression/README.md)
+
+这些是对应主题的可运行教学实验；实际 OS 隔离能力和模拟策略的区别以各 Lab README 为准。
