@@ -220,3 +220,10 @@ https://www.anthropic.com/research/claude-code-sandboxing
 
 VS Code:
 https://code.visualstudio.com/docs/agents/run/agent-sandboxing
+
+## 本讲实验代码
+
+- [Effective Policy 合成](../labs/08-policy-engine/README.md)
+- [单次命令扩权](../labs/19-command-expansion/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
