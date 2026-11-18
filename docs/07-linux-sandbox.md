@@ -160,7 +160,6 @@ https://github.com/containers/bubblewrap
 Codex sandbox manager:
 https://github.com/openai/codex/blob/main/codex-rs/sandboxing/src/manager.rs
 
-
 ## 9. 三个最容易混淆的边界
 
 1. **Namespace 不等于 deny policy。** 它改变进程看到的资源视图；如果又把宿主机目录、网络接口或 socket 挂进来，仍可能暴露资源。
@@ -170,22 +169,3 @@ https://github.com/openai/codex/blob/main/codex-rs/sandboxing/src/manager.rs
 ## 参考补充
 
 Landlock ABI / access rights：https://www.kernel.org/doc/html/latest/userspace-api/landlock.html
-
-
-## 9. 三个最容易混淆的边界
-
-1. **Namespace 不等于 deny policy。** 它改变进程看到的资源视图；如果又把宿主机目录、网络接口或 socket 挂进来，仍可能暴露资源。
-2. **Network Namespace 不自动等于“永远断网”。** 新建的 network namespace 默认没有宿主机网络接口连接；但如果运行时配置 veth、路由、代理或其他接口，它就可能联网。必须检查实际拓扑。
-3. **Landlock / seccomp 不会自动覆盖已经独立启动的进程。** 必须确认执行进程确实在受限链路内启动，并理解每种机制的继承规则。
-
-## 参考补充
-
-Landlock ABI / access rights：https://www.kernel.org/doc/html/latest/userspace-api/landlock.html
-
-
-Landlock 还有两个经常被漏掉的边界：
-
-- 文件系统访问权限并未覆盖所有文件相关 syscall；例如 `stat`、`chmod`、`chown`、`flock`、`setxattr` 等行为不能简单认为都被 Landlock 路径规则限制。
-- Landlock 规则对 bind mount 与 OverlayFS 的路径层次有不同语义；bind mount 会传播相关路径限制，但 OverlayFS 的 lower / upper / merged hierarchy 需要分别理解，不能只在一个路径上加规则就推断其他 OverlayFS 视图也受限。
-
-参考：https://www.kernel.org/doc/html/latest/userspace-api/landlock.html
