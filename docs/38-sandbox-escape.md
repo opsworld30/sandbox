@@ -87,7 +87,7 @@
 
 然后：
 
-    attacker changes file
+    attacker changes symlink / path
       ↓
     Use
 
@@ -99,17 +99,11 @@
 
 这就是：
 
-> TOCTOU
+> TOCTOU（Time Of Check to Time Of Use）
 
-所以安全代码尽量让：
+例如代码先用 `realpath()` 检查路径在 `/workspace`，随后攻击者替换其中的 symlink，再让程序按原路径打开文件。检查时和使用时访问的对象可能已经不同。
 
-    Check
-    +
-    Open
-    +
-    Enforcement
-
-由 OS 原语共同完成，而不是只依赖字符串路径判断。
+所以安全代码应尽可能使用目录 FD、`openat2` 的路径解析约束和 OS Sandbox enforcement；不能只依赖字符串规范化或前缀判断。
 
 ## 5. /proc
 
@@ -231,3 +225,19 @@ Linux：
     Security Test Suite
     +
     Escape Challenge
+
+
+## 11. 逃逸测试不要只测路径字符串
+
+还要检查：
+
+- 进入 Sandbox 前打开的 FD；
+- SCM_RIGHTS 等 FD passing；
+- hardlink / rename / REFER；
+- procfs、mount points 和 bind mounts；
+- Unix Domain Socket；
+- 子进程脱离进程组；
+- 网络 Proxy bypass；
+- Kernel / VMM 漏洞和配置错误。
+
+一个安全测试只证明了特定版本、配置和平台下的行为，不代表所有 Kernel 和所有 Backend 都没有逃逸路径。
