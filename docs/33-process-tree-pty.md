@@ -222,3 +222,14 @@ Sandbox 的对象不是：
 而是：
 
 > 一个受约束的 Process Tree。
+
+
+## 11. Process Group 与 cgroup 不是一回事
+
+POSIX process group 可以帮助发送信号，但子进程可能通过 `setsid()` 等方式脱离原进程组。只记录 PID 或 kill 一个 process group 都不一定能覆盖整个 Session。
+
+Linux 生产环境应优先使用 cgroup v2 将 Session 的全部进程纳入同一个控制组；销毁时终止整个 cgroup，并验证进程数归零。Windows 可使用 Job Object 管理进程树。具体平台要选能防止子进程脱离管理的机制。
+
+## 12. PTY 不提供安全隔离
+
+PTY 解决终端交互、控制字符和 TTY 语义；它本身不限制文件、网络、进程或资源。PTY helper、shell 和所有子进程都必须在正确的 Sandbox / cgroup / Job Object 中运行。
