@@ -300,3 +300,11 @@ https://openai.com/index/building-codex-windows-sandbox/
 当前官方文档指出，Codex 需要能够创建所需的 unprivileged user namespace。某些 Linux 发行版（例如特定 Ubuntu AppArmor 配置）会限制这一能力。遇到启动警告时，应先按官方说明配置 bwrap / AppArmor，而不是直接关闭系统的 user namespace 安全限制。
 
 此外，Codex 的 Sandbox 适用于 Agent 启动的命令及其子进程；不要把它理解为系统上所有由 IDE 或其他服务独立启动的进程都会自动受限。
+
+## 本讲实验代码
+
+- [Runner / Session](../labs/03-runner-session/README.md)
+- [Linux bubblewrap](../labs/04-bubblewrap/README.md)
+- [Mini Runtime](../labs/17-mini-runtime/README.md)
+
+这些是对应主题的可运行教学实验或产品设计复现；并非厂商内部实现的源码副本。
