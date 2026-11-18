@@ -71,9 +71,9 @@ AI Agent 最终会执行：
 
 ### 第五阶段：主流 AI Coding Sandbox 实战拆解
 25. Codex Sandbox：Permission → Sandbox Manager → OS Backend
-26. Claude Code Sandbox：Filesystem + Network 双边界
+26. Claude Code Bash Sandbox：Filesystem + Network，以及工具覆盖边界
 27. Cursor Sandbox：Permission / Sandbox / Classifier 分层
-28. VS Code Agent Sandbox：Terminal / MCP / LSP 一起保护
+28. VS Code Agent Sandbox：Terminal 与托管 MCP / LSP 的隔离范围
 29. Gemini CLI Sandbox：Tool-level Sandbox 与动态扩权
 30. Windows Sandbox：为什么需要自己组合 OS 能力
 
@@ -117,50 +117,77 @@ AI Agent 最终会执行：
 
     Local
       ├── macOS → Seatbelt
-      ├── Linux → Landlock / seccomp
-      └── Windows → native sandbox / WSL path
+      ├── Linux / WSL2 → bubblewrap（bwrap）
+      └── Windows → native Windows sandbox
 
     Cloud
-      └── isolated container
+      └── separate remote execution environment
+
+    Note:
+      Codex local Linux implementation should not be
+      described as Landlock + seccomp by default.
 
 ### Claude Code
 
-    Local
+    Local Claude Code Bash Sandbox
       ├── macOS → Seatbelt
-      └── Linux → bubblewrap
+      ├── Linux / WSL2 → bubblewrap + network proxy
+      └── Native Windows → use WSL2 / container
 
-    Cloud
-      └── isolated environment + proxy / credential mediation
+    Scope:
+      File tools / MCP / hooks are not automatically
+      covered by the Bash Sandbox.
+
+    Cloud Session:
+      separate managed VM + server-side GitHub proxy
+
+    Independent sandbox-runtime:
+      separate project; Windows support is Alpha.
 
 ### Cursor
 
     Local Agent
       ↓
-    Run Mode / Permission
+    Run Mode / Permission / Auto-review
       ↓
-    Sandbox
-      ↓
-    macOS Seatbelt / Linux native sandbox
+    Shell Sandbox
+      ├── macOS → Seatbelt
+      └── Linux → Landlock, bubblewrap fallback
+
+    Auto-review:
+      may review non-sandboxed Shell / MCP / Fetch calls.
+      Classifier is not a security boundary.
+      Cloud Agents use a different execution model.
 
 ### VS Code / Copilot
 
-    Agent Host
-      ├── Terminal
-      ├── MCP
-      └── Language Server
+    Copilot Harness Session
+      ├── Terminal + child processes
+      ├── managed MCP Server
+      └── managed Language Server
               ↓
           Sandbox
 
+    Defaults:
+      Sandbox off
+      outbound network allowNetwork = true
+
+    Windows BaseContainer:
+      Experimental
+
 ### Gemini CLI
 
-    Tool
+    Gemini CLI
       ↓
-    Sandbox Backend
-      ├── Seatbelt
-      ├── Docker
-      ├── Podman
-      ├── runsc
-      └── LXC
+    Sandbox Provider
+      ├── macOS → Seatbelt
+      ├── Docker / Podman → Container
+      ├── Windows → Windows Native Sandbox
+      ├── Linux → gVisor / runsc
+      └── Linux → LXC / LXD (Experimental)
+
+    Additional:
+      Tool-level Sandbox + per-command Sandbox Expansion
 
 ## 最重要的认知
 
@@ -187,6 +214,14 @@ AI Agent 最终会执行：
     Kernel
 
 
+## 技术审查记录
+
+本轮第 1～44 讲及 Lab 01 / Lab 02 的技术审查和修订记录：
+
+- [课程技术审查报告](docs/00-technical-review.md)
+
+**产品实现核验日期：2026-11-18。** Codex、Claude Code、Cursor、VS Code、Gemini CLI 的 Sandbox 能力会随版本变化，阅读时应同时查看对应官方文档。
+
 ## 学习标准
 
 每一讲都必须回答：
@@ -202,7 +237,7 @@ AI Agent 最终会执行：
 ## 参考资料
 
 Linux seccomp:
-https://kernel.org/doc/html/latest/userspace-api/seccomp_filter.html
+https://www.kernel.org/doc/html/latest/userspace-api/seccomp_filter.html
 
 Linux Landlock:
 https://docs.kernel.org/userspace-api/landlock.html
@@ -213,11 +248,29 @@ https://github.com/containers/bubblewrap
 Docker seccomp:
 https://docs.docker.com/engine/security/seccomp/
 
-OpenAI Codex sandbox:
-https://github.com/openai/codex/tree/main/codex-rs/sandboxing
+OpenAI Codex Sandbox:
+https://developers.openai.com/codex/concepts/sandboxing
 
-Anthropic Sandbox Runtime:
-https://github.com/anthropic-experimental/sandbox-runtime
+OpenAI Codex Windows Sandbox:
+https://openai.com/index/building-codex-windows-sandbox/
+
+Claude Code Sandbox:
+https://code.claude.com/docs/en/sandboxing
+
+Anthropic sandbox-runtime:
+https://github.com/anthropics/sandbox-runtime
+
+Cursor Run Modes:
+https://cursor.com/docs/agent/security/run-modes
+
+Gemini CLI Sandbox:
+https://geminicli.com/docs/cli/sandbox/
+
+OpenSandbox:
+https://github.com/opensandbox-group/OpenSandbox
+
+OpenAI Agents API Hosted Sandbox:
+https://developers.openai.com/api/docs/guides/agents-api/environments/openai-hosted
 
 VS Code Agent Sandboxing:
 https://code.visualstudio.com/docs/agents/run/agent-sandboxing
@@ -235,11 +288,12 @@ https://code.visualstudio.com/docs/agents/run/agent-sandboxing
   - [C 代码](labs/02-landlock/landlock_demo.c)
   - [Makefile](labs/02-landlock/Makefile)
 
-后续会继续补充：
+下一轮待补充的实战：
 
-- Landlock 实验；
-- bubblewrap 实验；
-- network proxy 实验；
-- workspace boundary 实验；
-- Prompt Injection + Sandbox 实验；
-- Sandbox Runtime 综合项目。
+- bubblewrap 最小可运行实验；
+- Network Namespace + forced proxy 实验；
+- Workspace / symlink / inherited FD 边界实验；
+- Credential Broker fake service；
+- Process Tree + cgroup v2 清理实验；
+- Prompt Injection + Sandbox 验证；
+- Mini AI Sandbox Runtime 综合项目。
