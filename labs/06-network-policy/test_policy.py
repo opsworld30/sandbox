@@ -19,6 +19,11 @@ class EgressPolicyTests(unittest.TestCase):
     def test_local_ip_is_denied(self):
         self.assertFalse(self.policy.decide("127.0.0.1")[0])
 
+    def test_local_hostname_is_denied_even_if_listed(self):
+        local_policy = EgressPolicy({"localhost", "service.local"})
+        self.assertFalse(local_policy.decide("localhost")[0])
+        self.assertFalse(local_policy.decide("service.local")[0])
+
     def test_scheme_is_not_a_hostname(self):
         self.assertFalse(self.policy.decide("https://github.com")[0])
 
