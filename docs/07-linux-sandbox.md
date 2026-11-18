@@ -67,9 +67,15 @@ User Namespace 可以建立独立的 UID/GID 映射。
 
 bubblewrap 是 Linux 上常见的 sandbox 构造工具。
 
-概念命令：
+下面是**概念示意，不是可直接复制到所有发行版运行的完整命令**；真实环境还要按发行版绑定 shell、动态库、运行时目录和 workspace，并显式设计网络拓扑：
 
-    bwrap       --ro-bind /usr /usr       --proc /proc       --dev /dev       --unshare-pid       --new-session       bash
+    bwrap \
+      --ro-bind /usr /usr \
+      --proc /proc \
+      --dev /dev \
+      --unshare-pid \
+      --new-session \
+      /bin/sh
 
 它主要负责：
 
@@ -95,7 +101,7 @@ Landlock 是 Linux Kernel 提供的 unprivileged access-control 机制。
     /other
       deny
 
-也可以限制网络访问。
+从 ABI v4 起，Landlock 可按 TCP 端口限制 bind / connect；ABI v10 起增加 UDP 端口限制。它不是按域名（FQDN）做 allowlist 的机制。
 
 ## 6. seccomp
 
@@ -104,8 +110,6 @@ seccomp 更关注：
 > 这个进程可以调用哪些 system call？
 
 seccomp filter 使用受限的 classic BPF（cBPF）程序，不要把它误认为可以任意运行 eBPF 程序。它可以检查 syscall number 和部分原始参数值，但不能安全地把用户态指针解引用成路径字符串或完整网络地址来做通用授权。文件路径应该交给 Landlock / mount namespace 等机制，网络目的地应该交给 Network Namespace、Firewall 或强制 Proxy。
-
-seccomp filter 使用受限的 classic BPF（cBPF）程序，不要把它误认为可以任意运行 eBPF 程序。它可以检查 syscall number 和部分原始参数值，但不能安全地把用户态指针解引用成路径字符串或完整网络地址来做通用授权。
 
 所以：
 
@@ -141,7 +145,7 @@ no_new_privs 的目标之一是防止进程通过 exec 等方式获得新的特�
     │ Network      │ → proxy / namespace
     └──────────────┘
 
-OpenAI Codex 当前公开实现可以看到 Linux 路径组合 Landlock/seccomp，并使用 sandbox manager 与 bubblewrap 等组件。
+不要把不同产品的 Linux Backend 混成一套：截至 2026-11-18，Codex 当前公开 Sandbox 文档描述的 Linux / WSL2 主路径是 bubblewrap（bwrap）；其他产品或自研 Runtime 可以组合 Landlock、seccomp 与 namespace。具体实现要按产品、版本和源码分别核对。
 
 ## 面试题
 
