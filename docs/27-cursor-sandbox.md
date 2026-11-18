@@ -1,17 +1,18 @@
 # 第 27 讲：拆解 Cursor Sandbox——Sandbox、Permissions、Classifier 为什么要分开
 
-## 1. Cursor 的设计值得研究什么
+## 1. Cursor 当前 Run Modes 与 Sandbox 的关系
 
-Cursor 的公开文档把：
+截至 2026-11-18，Cursor 当前公开 Run Modes 为：
 
-    Run Mode
-    Permission
-    Sandbox
-    Classifier
+    Auto-review
+    Allowlist
+    Run Everything
 
-分成不同层。
+Run Modes 决定工具调用如何自动执行、何时需要用户确认；Sandbox 则是叠加在 Shell / Terminal 命令上的 OS 访问限制。它们不是同一个开关。
 
-这非常适合用来理解现代 Agent Security。
+Auto-review 适用于 Shell、MCP 和 Fetch 调用；但 OS Sandbox 主要用于受支持的本地 Shell 命令。Cursor Cloud Agents 使用独立的专用机器执行，不使用本地 Run Modes 的审批流程。
+
+产品模式会随版本变化，以下按当前公开文档描述。
 
 ## 2. 三个问题
 
@@ -271,3 +272,18 @@ https://cursor.com/blog/secure-sandbox
 Cursor 的 Sandbox 默认阻止任意网络访问；网络模式可选择仅使用 `sandbox.json` allowlist、allowlist 加 Cursor 内置默认域名，或允许全部网络。当前默认网络模式是 allowlist + 内置默认域名。
 
 这和 VS Code Copilot Harness 的 `allowNetwork=true` 默认值不同，不能把不同产品的默认配置混成一套。
+
+
+## 14. Read Access 默认值也会影响实际边界
+
+Cursor 当前 Read Access 的默认模式是 `System`，Agent 可以读取 Workspace 外的文件而无需先请求批准。若要把读取范围收窄到项目，需要选择 `Workspace` 并配置 Read Allowlist。
+
+因此要分开理解：
+
+- Shell Sandbox 的执行限制；
+- Agent 文件读取权限；
+- Auto-review 的审批策略。
+
+不能只开启 Shell Sandbox，就推断 Agent 的所有文件读取都只限于当前 Workspace。
+
+当前公开的本地 Sandbox 平台选项为 macOS 与 Linux；不要把这套实现直接推断到 Windows。
