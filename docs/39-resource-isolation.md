@@ -84,11 +84,11 @@ Fork Bomb：
 
 Linux 可以结合：
 
-    cgroups
+    cgroups v2 pids.max
     RLIMIT_NPROC
     PID namespace
 
-不同机制解决的问题不同。
+不同机制解决的问题不同。注意 `RLIMIT_NPROC` 通常按 real UID 统计进程 / 线程数，不是天然的 per-Session 限额；多个 Sandbox 共用 UID 时，使用 cgroup pids controller 通常更适合做 Session 级限制。
 
 ## 5. Memory
 
@@ -181,16 +181,17 @@ Agent 可以：
 
 Linux cgroups 解决：
 
-> 资源控制和统计。
+> 对一组进程进行资源控制和统计。
 
-典型：
+典型 cgroup v2 控制器：
 
     Sandbox cgroup
        ├── cpu
        ├── memory
        ├── pids
-       ├── io
-       └── ...
+       └── io
+
+注意：`io` 控制器主要控制 I/O 带宽 / IOPS 等资源，不等于磁盘容量配额。磁盘空间上限通常需要文件系统 quota、project quota 或独立受限 volume。
 
 Process tree：
 
@@ -275,3 +276,18 @@ Process tree：
 为什么 cgroups 和 seccomp 都需要？
 
 seccomp 控制 syscall 能力，cgroups 控制资源消耗。一个限制“能请求什么”，一个限制“最多消耗多少”。
+
+
+## 14. cgroup v2 与 RLIMIT 的职责边界
+
+| 需求 | 常见机制 | 说明 |
+|---|---|---|
+| CPU 配额 | cgroup `cpu.max` | 限制一组进程的 CPU 使用比例 |
+| 内存上限 | cgroup `memory.max` | 限制 cgroup 内存使用 |
+| 进程数量 | cgroup `pids.max` | 比共享 UID 下的 RLIMIT_NPROC 更适合 per-session |
+| I/O 限制 | cgroup `io.max` / `io.weight` | 控制 I/O 速率或权重，不是磁盘容量 |
+| 单文件大小 | `RLIMIT_FSIZE` | 限制单个文件可创建的最大大小 |
+| 文件描述符 | `RLIMIT_NOFILE` | 限制进程可打开 FD 数量 |
+| 磁盘容量 | filesystem quota / project quota | 需要文件系统或存储层支持 |
+
+资源策略必须在 OS / 存储层强制执行，不应只靠应用层计数器。
