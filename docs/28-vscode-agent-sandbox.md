@@ -214,3 +214,19 @@ https://code.visualstudio.com/docs/agents/concepts/trust-and-safety
 ## 11. 一个重要区分：Built-in Tools 与 OS Process Tools
 
 当前文档说明，Terminal 和被 Agent Host 管理的 MCP / LSP 进程可应用 Sandbox；不启动 OS 进程的 Built-in Tools 使用自身的权限检查。这些工具不能简单画成同一条操作系统进程树。
+
+
+## 12. Windows 与 Credential Proxy 的特殊条件
+
+当前 VS Code 文档还有两个容易漏掉的细节：
+
+- Windows 上，使用 Proxy、hostname restriction 或 credential masking 时，需要允许 Sandbox 访问本机 loopback listener；这会要求 `allowLocalNetwork = true`，从而增加本地网络访问面。
+- Credential masking 可以让工具看到 placeholder，再由 Proxy 只向批准的 HTTPS host 注入真实凭证；但它需要证书信任配置，且不是简单的“环境变量自动隐藏”。
+
+此外，Windows 上的 per-server MCP Sandbox 目前不可用；不要把 macOS / Linux 的 MCP 隔离能力直接推断到 Windows。
+
+## 13. 失败回退和远程执行
+
+`allowUnsandboxedCommands` 默认 true：命令不能在 Sandbox 内执行时，Agent 可以请求用户批准在 Sandbox 外执行。设置为 false 才会拒绝该回退。
+
+远程 Session 的 Sandbox 必须在实际运行 Agent 的远程 Host 配置；本机 VS Code 客户端的 Sandbox 设置不会自动限制远程执行主机。
