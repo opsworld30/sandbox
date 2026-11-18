@@ -200,3 +200,9 @@ Broker 验证：
 - **Broker / Proxy 代为执行操作**：可以让真实凭证始终留在可信服务端，只向 Agent 返回操作结果。
 
 如果设计目标是“Agent 根本拿不到真实凭证”，必须使用第二种模式，或确保凭证只被可信 helper 消费、且 Agent 无法读取其进程内存、FD 或 IPC payload。
+
+## 本讲实验代码
+
+- [Fake Credential Broker](../labs/07-credential-broker/README.md)
+
+这些是对应主题的可运行教学实验或产品设计复现；并非厂商内部实现的源码副本。
