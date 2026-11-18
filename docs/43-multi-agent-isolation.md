@@ -1,4 +1,4 @@
-# 第 43 讲：Multi-Agent Isolation——多个 Agent 为什么不能共享一个 Sandbox
+# 第 43 讲：Multi-Agent Isolation——多个 Agent 何时需要独立 Sandbox
 
 ## 1. Multi-Agent 是什么
 
