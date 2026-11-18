@@ -185,3 +185,10 @@ AI Agent 经常执行：
 - Cargo build scripts：https://doc.rust-lang.org/cargo/reference/build-scripts.html
 - Go test：https://pkg.go.dev/cmd/go#hdr-Test_packages
 - Go generate：https://pkg.go.dev/cmd/go#hdr-Generate_Go_files_by_processing_source
+
+## 本讲实验代码
+
+- [npm Lifecycle / Supply Chain](../labs/10-supply-chain/README.md)
+- [Cache 完整性与 Session 副本](../labs/23-cache-isolation/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
