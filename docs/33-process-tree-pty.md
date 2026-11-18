@@ -36,9 +36,9 @@
         ↓
       Child
 
-所有 descendants 都在：
+所有由 Sandbox 内进程创建、且没有通过特权 Broker / 外部服务转交执行的 descendants，都应继承同一或更严格的边界。
 
-    same policy boundary
+注意：不同 OS 原语的继承语义不同；如果子进程能访问 cgroup 控制接口、继承了边界外打开的 FD，或把工作委托给 Sandbox 外的服务，单靠“父进程在 Sandbox 中”不能证明整条执行链都受保护。
 
 ## 3. 为什么 Process Tree 还和 cleanup 有关
 
@@ -228,7 +228,7 @@ Sandbox 的对象不是：
 
 POSIX process group 可以帮助发送信号，但子进程可能通过 `setsid()` 等方式脱离原进程组。只记录 PID 或 kill 一个 process group 都不一定能覆盖整个 Session。
 
-Linux 生产环境应优先使用 cgroup v2 将 Session 的全部进程纳入同一个控制组；销毁时终止整个 cgroup，并验证进程数归零。Windows 可使用 Job Object 管理进程树。具体平台要选能防止子进程脱离管理的机制。
+Linux 生产环境可使用 cgroup v2 管理 Session 的进程集合；应在可信 Host 侧创建并管理 cgroup，避免把迁移进程所需的控制权限交给不可信进程。销毁时终止整个 cgroup，并验证进程数归零。Windows 可使用配置了合适限制的 Job Object 管理进程树。具体平台要选能防止子进程脱离管理的机制。
 
 ## 12. PTY 不提供安全隔离
 
