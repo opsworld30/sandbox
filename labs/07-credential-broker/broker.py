@@ -2,6 +2,7 @@
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
+import re
 
 ALLOWED_REPOSITORY = "opsworld30/sandbox-demo"
 ALLOWED_BRANCH_PREFIX = "agent/"
@@ -30,6 +31,9 @@ class Handler(BaseHTTPRequestHandler):
             self._reply(400, {"error": "invalid_json"})
             return
 
+        if not isinstance(request, dict):
+            self._reply(400, {"error": "json_object_required"})
+            return
         repository = request.get("repository")
         branch = request.get("branch")
         commit = request.get("commit")
@@ -39,7 +43,7 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(branch, str) or not branch.startswith(ALLOWED_BRANCH_PREFIX):
             self._reply(403, {"error": "branch_not_allowed"})
             return
-        if not isinstance(commit, str) or len(commit) != 40:
+        if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-fA-F]{40}", commit):
             self._reply(400, {"error": "invalid_commit_sha"})
             return
 
