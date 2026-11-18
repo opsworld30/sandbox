@@ -127,7 +127,7 @@ Gemini CLI 当前文档明确提供 Sandbox Expansion：
 
 ## 5. 为什么这比默认全开放好
 
-默认：
+当所选 Provider / Profile 将网络设为受限时，例如：
 
     network = deny
 
@@ -135,26 +135,14 @@ Agent：
 
     npm install
 
-失败。
-
-然后：
+可能因网络权限不足而触发 Sandbox Expansion Request：
 
     Request:
-    “需要访问 registry.npmjs.org”
+    “本次命令需要访问 registry.npmjs.org”
 
-用户批准。
+用户批准后，只为本次命令执行扩展相应能力，而不是永久修改整个 Session 的基础策略。
 
-最终：
-
-    network:
-      registry.npmjs.org
-
-而不是：
-
-    network:
-      *
-
-扩展通常针对本次命令执行，不应自动理解成把 Session 的长期基础策略永久放宽。
+注意：Gemini CLI 的默认网络行为取决于 Provider 和 Profile。macOS 默认 `permissive-open` profile 允许网络；不能把“默认断网”概括成所有 Gemini CLI Sandbox 的统一默认值。
 
 ## 6. 这其实是 Capability Expansion
 
