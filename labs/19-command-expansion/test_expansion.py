@@ -20,6 +20,8 @@ class ExpansionTests(unittest.TestCase):
         policy = CommandPolicy()
         policy.approve(ExpansionRequest("cmd-1", "registry.npmjs.org", "install"))
         self.assertFalse(policy.base_network_enabled)
+        policy.complete("cmd-1")
+        self.assertFalse(policy.network_allowed("cmd-1", "registry.npmjs.org"))
 
 
 if __name__ == "__main__":
