@@ -22,3 +22,7 @@ class CommandPolicy:
         if self.base_network_enabled:
             return True
         return hostname.lower() in self.approved.get(command_id, set())
+
+    def complete(self, command_id: str) -> None:
+        """Discard command-scoped grants when that command finishes."""
+        self.approved.pop(command_id, None)
