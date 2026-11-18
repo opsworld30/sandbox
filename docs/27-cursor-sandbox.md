@@ -56,7 +56,9 @@ Auto-review 适用于 Shell、MCP 和 Fetch 调用；但 OS Sandbox 主要用于
 
 Cursor 当前 Auto-review 使用后端 LLM Classifier 审查某些不在 Sandbox 内执行的动作，以及 Sandbox 失败后申请在 Sandbox 外重试的动作。
 
-Classifier 可能误判：
+Classifier 在 Cursor 当前 Auto-review 中运行于 Cursor 后端，使用 Cursor 管理的小型模型；当前文档列出 Gemini 3.5 Flash Lite，并以 Haiku 作为 fallback。审查时它还可以对本机文件执行只读的 ReadFile、Grep、Glob、ListDir 等操作，以查看待执行脚本或相关上下文。
+
+Classifier 仍可能误判：
 
     false positive
     false negative
