@@ -225,3 +225,9 @@ https://github.com/google-gemini/gemini-cli
 如果 Gemini CLI 本身已经运行在一个 Docker 容器里，而你又选择 Docker Sandbox，CLI 可能需要访问宿主机 Docker Socket 来创建 sibling sandbox container，并且 workspace 的绝对路径必须与宿主机看到的路径一致。
 
 这意味着 `/var/run/docker.sock` 是高权限能力：不要为了让 Sandbox 正常工作，就无条件把 Docker Socket 暴露给不可信 Agent 进程。应把创建 Sandbox 的职责放在可信 Host / Broker 一侧。
+
+## 本讲实验代码
+
+- [Per-command Sandbox Expansion](../labs/19-command-expansion/README.md)
+
+这些是对应主题的可运行教学实验或产品设计复现；并非厂商内部实现的源码副本。
