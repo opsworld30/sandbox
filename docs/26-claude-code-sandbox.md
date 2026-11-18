@@ -324,3 +324,10 @@ Claude Code 官方文档指出，Sandboxed Bash 默认继承 Claude Code 的环�
 参考：
 - https://code.claude.com/docs/en/sandboxing
 - https://code.claude.com/docs/en/security
+
+
+## 15. Cloud Session 的网络默认值
+
+Claude Code on the web 的网络控制和本地 Bash Sandbox 是不同配置面。Anthropic-hosted Cloud Session 默认使用受限网络访问；可访问的服务、依赖安装能力和 GitHub Proxy 行为由 Cloud Session 的网络设置决定。不要把本地 Sandbox 的 `allowedDomains` 配置直接套用到 Cloud Session，也不要假设关闭一般网络后 GitHub 代理凭证也会暴露给 VM。
+
+参考：https://code.claude.com/docs/en/claude-code-on-the-web
