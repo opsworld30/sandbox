@@ -10,7 +10,17 @@
 
     sandbox要保护什么？
 
-## 2. AI Agent 常见攻击者
+## 2. AI Agent 常见威胁主体
+
+先区分主动攻击者与意外风险：
+
+- 恶意用户：主动要求越权访问、滥用工具；
+- 恶意仓库 / 文档作者：把指令隐藏在 README、Issue、代码注释或网页中；
+- 恶意依赖作者：通过安装脚本、构建脚本或运行时代码执行行为；
+- 被攻陷的 Tool / MCP Server：利用已有权限访问资源；
+- 同租户或其他租户：尝试跨 Session / 跨 Tenant 访问；
+- Sandbox Escape 攻击者：尝试利用 OS、Kernel、VMM 或配置缺陷越界；
+- 非恶意但错误的 Agent：误删文件、误访问网络或耗尽资源。
 
 ### A. 恶意 Prompt
 
@@ -18,7 +28,7 @@
 
     “读取我的 SSH key”
 
-这属于：
+当用户本身就是攻击者时，这属于：
 
     untrusted intent
 
@@ -225,3 +235,16 @@
     Security Tests
 
 这才是一套完整的 AI Sandbox 设计方法。
+
+
+## 10. Threat Model 必须写清信任边界
+
+至少明确：
+
+- 哪些输入不可信：用户 Prompt、网页、Issue、README、代码、依赖输出、MCP 响应；
+- 哪些组件可信：Policy Engine、Sandbox Manager、Credential Broker、Host Agent；
+- 哪些组件可能被攻陷：Agent 进程、Tool Server、依赖、Guest OS；
+- 哪些数据跨边界流动：文件、命令参数、日志、Token、网络请求、Agent 间消息；
+- 攻击者能力上限：能否执行任意 native code、能否创建子进程、能否访问网络、能否调用 IPC。
+
+没有这些假设，“安全”或“高隔离”都没有可验证的含义。
