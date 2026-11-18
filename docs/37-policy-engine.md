@@ -319,3 +319,10 @@ Enforcement 是：
     test verifies denial
 
 只验证 JSON 合并结果，不代表策略已经在操作系统中生效。
+
+## 本讲实验代码
+
+- [Effective Policy Engine](../labs/08-policy-engine/README.md)
+- [Mini Runtime](../labs/17-mini-runtime/README.md)
+
+这些是对应主题的可运行教学实验；实际 OS 隔离能力和模拟策略的区别以各 Lab README 为准。
