@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from pathlib import Path
 import shutil
 
@@ -29,7 +30,12 @@ class CacheStore:
         return checksum
 
     def materialize(self, checksum: str, filename: str, session_dir: Path) -> Path:
-        source = self.root / checksum / filename
+        if not re.fullmatch(r"[0-9a-f]{64}", checksum):
+            raise ValueError("invalid SHA-256 digest")
+        if Path(filename).name != filename or filename in {"", ".", ".."}:
+            raise ValueError("filename must be a simple basename")
+        source = (self.root / checksum / filename).resolve()
+        source.relative_to(self.root.resolve())
         if not source.is_file() or digest(source) != checksum:
             raise ValueError("cache artifact missing or integrity check failed")
         session_dir.mkdir(parents=True, exist_ok=True)
