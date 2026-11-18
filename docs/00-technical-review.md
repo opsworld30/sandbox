@@ -201,4 +201,4 @@
 - Cursor Auto-review 当前由 Cursor 后端小型模型进行，文档列出 Gemini 3.5 Flash Lite 和 Haiku fallback；Classifier 还可能读取本机只读上下文，但不是 OS 安全边界。
 - VS Code Copilot Harness 的默认 Git HTTPS 与 GitHub CLI 认证均可在 Sandbox 中使用；Sandbox 开启后缺少依赖时，默认工具不会静默退回无 Sandbox 执行。
 - OpenAI Agents API Pre-warm Environment 可以被多个 Session 共享；共享后文件、进程、包和环境配置也共享，不应把多个 Session 误认为多个隔离 workspace。
-- Anthropic sandbox-runtime 的 Windows Alpha 当前有默认 `srt-win` 与可选 `mxc` 两种 Backend，不能把 WFP / ACL 实现泛化到 MXC。
+- Anthropic sandbox-runtime 的 Windows `srt-win` 为 Alpha；可选 MXC Backend 为 Experimental，需要 BaseContainer 与 Node.js 24+，不支持时不自动回退。两种 Backend 的隔离实现不同；`srt-win` 的 Sandbox 用户 / 组是机器级，Profile grant 在共享 Windows 主机上会形成跨本地用户的读取风险。
