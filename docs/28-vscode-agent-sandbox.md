@@ -156,7 +156,7 @@ Cloud Agent：
 - Git HTTPS 凭证与 GitHub CLI 认证默认可在 Sandbox 中使用（`authenticategit` / `authenticategh` 均默认 true）；
 - 允许申请 Sandbox 外执行的开关默认 true，实际执行仍需确认。
 
-这意味着 Sandbox 不等于“进程没有凭证”。若任务不需要 GitHub 权限，应关闭对应凭证注入能力。若 bwrap、slirp4netns、util-linux 或兼容 iptables 等依赖缺失，默认 Copilot Harness 工具不会静默退回到无 Sandbox 执行，而会提示修复；依赖必须安装在真正运行 Agent 命令的 Host / WSL / Remote Host 上。系统依赖缺失时，默认工具不会静默退回到无 Sandbox 执行，而会提示修复依赖；应在实际执行主机上安装并检查依赖。
+这意味着 Sandbox 中的命令默认可以通过 Git / GitHub 认证集成使用相应权限；但不要据此推断真实 Token 会以明文注入进程。当前 Copilot 还提供 Credential Proxy，用 placeholder 替代真实凭证，并由本机 Proxy 对批准的 HTTPS 目标完成凭证替换。即便 Token 不直接暴露，Agent 仍然拥有相应的操作能力；若任务不需要 GitHub 权限，应关闭对应认证能力。若 bwrap、slirp4netns、util-linux 或兼容 iptables 等依赖缺失，默认 Copilot Harness 工具不会静默退回到无 Sandbox 执行，而会提示修复；依赖必须安装在真正运行 Agent 命令的 Host / WSL / Remote Host 上。系统依赖缺失时，默认工具不会静默退回到无 Sandbox 执行，而会提示修复依赖；应在实际执行主机上安装并检查依赖。
 
 平台支持：
 
