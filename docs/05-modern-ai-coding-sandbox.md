@@ -135,3 +135,9 @@ https://code.visualstudio.com/docs/agents/run/agent-sandboxing
 Seatbelt、Landlock、seccomp、bubblewrap、Container、MicroVM 解决的是不同层次的问题。原生 Sandbox 的优势通常是更贴近宿主机工具链、启动开销较低；容器的优势是环境封装和部署一致性；MicroVM / VM 提供不同的内核与虚拟化边界。
 
 不能只按技术名称排出固定安全等级。必须先写 Threat Model，再核对实际策略、权限、网络、凭证、资源限制和逃逸面。
+
+## 重要边界：宿主机原生 Sandbox 不等于天然比容器安全
+
+Seatbelt、Landlock、seccomp、bubblewrap、Container、MicroVM 解决的是不同层次的问题。原生 Sandbox 的优势通常是更贴近宿主机工具链、启动开销较低；容器的优势是环境封装和部署一致性；MicroVM / VM 提供不同的内核与虚拟化边界。
+
+不能只按技术名称排出固定安全等级。必须先写 Threat Model，再核对实际策略、权限、网络、凭证、资源限制和逃逸面。
