@@ -113,3 +113,8 @@ Landlock：
 - Kernel / headers 版本兼容性。
 
 Landlock 是附加限制层，不会授予进程原本没有的权限。
+
+
+### 多线程程序的额外说明
+
+本实验调用 `landlock_restrict_self(ruleset_fd, 0)`，因此按单线程 Demo 设计。Landlock ABI v8 起提供 `LANDLOCK_RESTRICT_SELF_TSYNC`，可以把规则同步应用到调用进程的所有线程；生产实现应检测 ABI，并明确决定是在线程创建前安装，还是使用 TSYNC。
