@@ -103,6 +103,8 @@ seccomp 更关注：
 
 > 这个进程可以调用哪些 system call？
 
+seccomp filter 使用受限的 classic BPF（cBPF）程序，不要把它误认为可以任意运行 eBPF 程序。它可以检查 syscall number 和部分原始参数值，但不能安全地把用户态指针解引用成路径字符串或完整网络地址来做通用授权。文件路径应该交给 Landlock / mount namespace 等机制，网络目的地应该交给 Network Namespace、Firewall 或强制 Proxy。
+
 seccomp filter 使用受限的 classic BPF（cBPF）程序，不要把它误认为可以任意运行 eBPF 程序。它可以检查 syscall number 和部分原始参数值，但不能安全地把用户态指针解引用成路径字符串或完整网络地址来做通用授权。
 
 所以：
@@ -157,6 +159,17 @@ https://github.com/containers/bubblewrap
 
 Codex sandbox manager:
 https://github.com/openai/codex/blob/main/codex-rs/sandboxing/src/manager.rs
+
+
+## 9. 三个最容易混淆的边界
+
+1. **Namespace 不等于 deny policy。** 它改变进程看到的资源视图；如果又把宿主机目录、网络接口或 socket 挂进来，仍可能暴露资源。
+2. **Network Namespace 不自动等于“永远断网”。** 新建的 network namespace 默认没有宿主机网络接口连接；但如果运行时配置 veth、路由、代理或其他接口，它就可能联网。必须检查实际拓扑。
+3. **Landlock / seccomp 不会自动覆盖已经独立启动的进程。** 必须确认执行进程确实在受限链路内启动，并理解每种机制的继承规则。
+
+## 参考补充
+
+Landlock ABI / access rights：https://www.kernel.org/doc/html/latest/userspace-api/landlock.html
 
 
 ## 9. 三个最容易混淆的边界
