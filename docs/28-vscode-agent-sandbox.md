@@ -153,7 +153,10 @@ Cloud Agent：
 - outbound network `allowNetwork`：默认 true；
 - local network `allowLocalNetwork`：默认 false；
 - 托管 MCP Server / LSP Server 的 Sandbox 开关默认 true；
+- Git HTTPS 凭证与 GitHub CLI 认证默认可在 Sandbox 中使用（`authenticategit` / `authenticategh` 均默认 true）；
 - 允许申请 Sandbox 外执行的开关默认 true，实际执行仍需确认。
+
+这意味着 Sandbox 不等于“进程没有凭证”。若任务不需要 GitHub 权限，应关闭对应凭证注入能力。
 
 平台支持：
 
