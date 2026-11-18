@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,14 +21,14 @@ int main(void) {
     /*
      * Demonstration only:
      * keep the default action as ALLOW,
-     * but return EPERM whenever mkdir is requested.
+     * but return EPERM whenever mkdirat is requested.
      *
      * This is intentionally not a production sandbox profile.
      */
     if (seccomp_rule_add(
             ctx,
             SCMP_ACT_ERRNO(EPERM),
-            SCMP_SYS(mkdir),
+            SCMP_SYS(mkdirat),
             0) < 0) {
         fprintf(stderr, "seccomp_rule_add failed\n");
         seccomp_release(ctx);
@@ -47,11 +48,11 @@ int main(void) {
     const char *path = "/tmp/seccomp-demo-created-by-filter";
 
     /*
-     * Call the exact syscall being filtered. This avoids depending on
-     * whether a particular libc wrapper uses mkdir() or mkdirat().
-     * SCMP_SYS(mkdir) resolves the native-architecture syscall number.
+     * Call the exact syscall being filtered. mkdirat is available across modern
+     * Linux architectures and is the underlying operation used by many libc
+     * mkdir() wrappers. SCMP_SYS(mkdirat) resolves the native syscall number.
      */
-    long rc = syscall(SCMP_SYS(mkdir), path, 0700);
+    long rc = syscall(SCMP_SYS(mkdirat), AT_FDCWD, path, 0700);
     if (rc == -1) {
         printf("mkdir syscall blocked as expected: errno=%d (%s)\n",
                errno, strerror(errno));
