@@ -88,23 +88,24 @@ Agent 经常：
        ↓
     rollback
 
-Checkpoint 可以建立在：
+Checkpoint / Rollback 可以建立在：
 
-- Git commit；
-- Git worktree；
+- Git commit / tag；
 - filesystem snapshot；
 - overlay filesystem；
-- VM snapshot。
+- VM / MicroVM snapshot。
+
+Git Worktree 是独立 checkout / 并行工作区机制，不是状态快照本身；它可以和 commit 或 filesystem snapshot 组合，用来隔离多个 Agent 的代码修改。
 
 ## 6. 为什么 Snapshot 和 Git 不完全一样
 
 Git：
 
-> 记录代码版本。
+> 记录版本化的代码状态。
 
-Snapshot：
+Runtime Snapshot：
 
-> 记录运行环境状态。
+> 按具体实现保存 workspace、磁盘或 VM 状态；并不一定包含完整进程内存和所有外部状态。
 
 环境里可能还有：
 
