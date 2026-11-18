@@ -69,11 +69,11 @@ Linux Container 提供：
 
 Claude Code 的公开资料说明其 Sandbox Runtime 使用 macOS Seatbelt 和 Linux bubblewrap，并同时建立文件系统和网络边界。
 
-Codex 的公开代码可以看到平台 Sandbox Manager：macOS 使用 Seatbelt，Linux 路径结合 Landlock/seccomp，并与网络代理和 workspace policy 配合。
+Codex 的当前公开 Sandbox 文档描述：macOS 使用 Seatbelt，Linux / WSL2 使用 bubblewrap（bwrap），Windows PowerShell 使用原生 Windows Sandbox。不要把其他产品或自研 Runtime 使用的 Landlock / seccomp 组合误写成 Codex 当前所有平台的统一实现。
 
 Cursor 文档也说明其本地 Sandbox 会限制文件、网络以及整个子进程树。
 
-VS Code Copilot 当前文档也把审批和 Sandbox 明确作为两层不同的保护，并对 terminal、MCP server、LSP server 等进程应用 Sandbox。
+VS Code 当前 Copilot Harness 文档也把审批和 Sandbox 明确作为两层不同的保护；默认工具的 Terminal，以及由 Agent Host 管理的 MCP Server / LSP Server 可以纳入 Sandbox。不要把它泛化成所有 VS Code 扩展和独立启动的服务都自动受限。
 
 因此：
 
