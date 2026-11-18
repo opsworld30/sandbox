@@ -26,33 +26,41 @@
 
 ## 3. Policy Engine
 
-输入：
+Policy Engine 接收的是结构化的主体、动作、资源和上下文，而不是只靠解析命令字符串：
 
-    command
-    cwd
-    workspace
-    network request
+    subject / session
     tool
-    credentials
+    action
+    resource
+    workspace
+    policy version
+    request context
 
 输出：
 
     allow
     deny
     ask
+    allow-with-scoped-capability
 
 例如：
 
-    command = npm test
-    cwd = /workspace
+    subject = session-123
+    action = file_write
+    resource = /workspace/app.go
+    tool = shell
 
     result = allow
 
 而：
 
-    read = ~/.ssh/id_rsa
+    subject = session-123
+    action = file_read
+    resource = ~/.ssh/id_rsa
 
     result = deny
+
+注意：Policy Engine 在执行前可以做静态决策，但它不能仅凭 `command = npm test` 预知程序运行时会访问哪些文件或连接哪些网络。最终必须由 OS / Proxy / Firewall 等 enforcement 机制在真实访问发生时强制执行。
 
 ## 4. Sandbox Manager
 
@@ -90,10 +98,15 @@
 抽象：
 
     FileRule
-      path
+      resource
       read
       write
       execute
+      create
+      remove
+      refer / rename
+
+策略执行不能只依赖字符串前缀或 `realpath()`。必须考虑 symlink、hardlink、路径替换竞态、已打开 FD 和文件句柄传递。优先使用 OS 原语和基于 FD 的安全路径解析。
 
 例如：
 
@@ -114,9 +127,12 @@
 抽象：
 
     NetworkRule
-      domain
+      destination
       port
+      protocol
       action
+
+其中 FQDN / domain allowlist 通常由强制 Egress Proxy 或 DNS + Firewall 组合实现；不能指望 seccomp 或 Landlock 单独做域名白名单。必须阻断绕过 Proxy 的 direct socket 路径。
 
 例如：
 
@@ -156,9 +172,12 @@
 这些限制可以在不同 Backend 映射到：
 
     cgroups
-    VM limits
+    filesystem quota
+    VM / container limits
     scheduler
     application timeout
+
+注意磁盘容量配额不是 cgroup 的通用 disk quota 功能：cgroup v2 的 `io` 控制器主要做 I/O 资源控制，磁盘空间上限通常还需要文件系统 quota、project quota 或有容量限制的独立 volume。
 
 ## 10. Audit Event
 
@@ -254,3 +273,35 @@ Agent 不应该关心自己是：
 ### Q：为什么 Policy Engine 和 Backend 分离？
 
 Policy 表达“想允许什么”，Backend 表达“在当前平台如何真正限制它”。
+
+
+## 15. Policy 与 Enforcement 必须分离
+
+    Policy Definition
+         ↓
+    Effective Policy
+         ↓
+    Policy Compiler
+         ↓
+    Backend Enforcement
+         ↓
+    Runtime Verification
+
+例如：
+
+- Seatbelt profile；
+- Landlock ruleset；
+- seccomp filter；
+- bubblewrap mount / namespace 参数；
+- cgroup v2 resource controls；
+- Egress Proxy / Firewall rules。
+
+**最重要的安全要求：** 如果某个 Backend 无法强制执行关键策略（例如要求按域名限制网络，但该 Backend 只有端口级规则），必须拒绝启动、改用支持的 Backend，或明确要求用户批准降级。不能把“配置已保存”当成“限制已生效”。
+
+## 16. API 与执行接口的安全补充
+
+- Exec API 应接收 argv 数组，避免把不可信字符串拼成 shell command。
+- Session ID 必须做身份认证和对象级授权，不能仅凭 ID 就访问其他用户 Session。
+- File API 需要处理 symlink、路径穿越、FD 和并发替换问题。
+- Destroy 必须清理整个进程集合、临时网络和临时凭证。
+- Audit 要区分“Policy 决策事件”和“真实 OS 访问事件”；后者只有在相应审计 / tracing 能力启用时才可完整观测。
