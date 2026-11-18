@@ -180,16 +180,16 @@ Agent：
     scope
     duration
 
-例如：
+以下是**自研 Runtime 的概念数据结构，不是 Gemini CLI 的实际 API schema**：
 
     {
       "type": "network",
       "host": "registry.npmjs.org",
       "port": 443,
-      "duration": "session"
+      "duration": "single_command"
     }
 
-审批后才更新：
+Gemini CLI 的扩权针对本次命令执行；不应把它描述成永久修改整个 Session 的策略。审批后才更新：
 
     EffectivePolicy
 
