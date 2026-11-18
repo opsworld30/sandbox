@@ -57,7 +57,7 @@ HTTP：
       ↓
     Proxy
       ↓
-    GET example.com
+    GET http://example.com/path
 
 HTTPS 常见：
 
@@ -65,14 +65,11 @@ HTTPS 常见：
       ↓
     Proxy
       ↓
-    TCP tunnel
+    encrypted TCP tunnel
 
-如果只需要控制：
+普通 CONNECT Proxy 可以看到 CONNECT 请求中的目标主机和端口，但 TLS 加密后通常看不到 HTTPS URL path、Header 和 Body。若要检查 TLS 内部内容，需要 TLS interception / MITM，这会引入证书部署、信任和隐私问题。
 
-    destination host
-    destination port
-
-不一定需要解密 HTTPS。
+如果只需要控制 destination host / port，不一定需要解密 HTTPS。
 
 ## 4. Domain Allowlist
 
@@ -118,9 +115,12 @@ HTTPS 常见：
 需要考虑：
 
     hostname
+    CNAME chain
     resolved IP
     redirect target
-    connection target
+    actual connection target
+
+Proxy 应自行解析或校验目标地址，并拒绝 loopback、link-local、private ranges 和不允许的 IPv6 范围；要防止 DNS rebinding 和 redirect 到私网地址。
 
 ## 6. localhost
 
@@ -287,3 +287,24 @@ Gateway 可以记录：
 为什么 HTTP Proxy 不能单独作为 Sandbox？
 
 因为程序可以直接创建 socket 绕过 HTTP_PROXY。因此需要 OS/network enforcement 保证流量不能绕过代理或防火墙。
+
+
+## 14. Proxy 必须是强制路径
+
+`HTTP_PROXY` / `HTTPS_PROXY` 只是程序环境配置，不是强制安全边界。程序可以忽略环境变量并直接调用 `socket()` / `connect()`。
+
+正确架构应当：
+
+    Sandbox
+      ↓
+    network namespace / firewall
+      ↓
+    only proxy endpoint reachable
+      ↓
+    Egress Proxy
+      ↓
+    policy + DNS + destination validation
+      ↓
+    Internet
+
+同时要分别处理 TCP、UDP、IPv6、DNS、Unix Domain Socket 和 host network。仅实现 HTTP CONNECT 不等于控制了所有网络协议。
