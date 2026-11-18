@@ -198,7 +198,7 @@ Windows Native Sandbox 使用 Low Mandatory Level（MIC），并用 `icacls` 设
 
 独立的 `@anthropic-ai/sandbox-runtime` Windows 支持目前标注为 Alpha。默认 `srt-win` Backend 使用专用 `srt-sandbox` 本地用户、Windows Filtering Platform（WFP）出站过滤、write-restricted token、Job Object 和文件系统 ACE。
 
-当前项目还提供可选的 `mxc` Backend：在支持的 Windows BaseContainer 环境中通过 MXC SDK 执行，不使用 `srt-sandbox` 用户和 ACL 安装流程。两种 Backend 不能混为一谈；`mxc` 需要匹配的 Windows build 与可用 SDK。
+当前项目还提供可选的 **实验性** `mxc` Backend：在支持的 Windows BaseContainer 环境中通过 `@microsoft/mxc-sdk` 执行，不使用 `srt-sandbox` 用户和 ACL 安装流程。它需要 Node.js 24+ 与可用的 MXC SDK；MXC 的 AppContainer tiers 不在此 Backend 使用。若 Host 不支持所需策略，会返回 `backend_unsupported`，不会自动回退到 `srt-win`。两种 Backend 不能混为一谈。
 
 这不是 Claude Code Native Windows Bash Sandbox；Claude Code 产品本身的本地 Bash Sandbox 文档仍要求 Windows 用户使用 WSL2 或容器环境。
 
@@ -238,3 +238,15 @@ https://openai.com/index/building-codex-windows-sandbox/
 Anthropic sandbox-runtime 的 Windows Alpha `srt-win` Backend 文档明确列出 WFP 方案的限制：过滤器以专用 Sandbox 用户的 SID 为条件，若受限进程在创建 Socket 前把另一个 Token 应用到线程，或由系统服务代为发起网络流量，过滤器未必能按预期跟踪该动作。
 
 因此 WFP 过滤器不是“所有网络都无条件封死”的魔法开关。需要把 Token 变更、服务代发流量、Loopback Proxy、进程树和实际 Socket 创建身份纳入测试。注意这些限制针对 `srt-win` Backend，不能直接套用到可选的 MXC Backend。
+
+
+## 14. srt-win 的共享 Windows 主机风险
+
+当前 `srt-win` 还有一个容易漏掉的部署边界：
+
+- Sandbox 用户与 Sandbox 组是**每台机器一份**，不是每个 Windows 用户各一份；
+- 安装流程可把调用用户的 Profile 授权给 Sandbox 组读取（凭证目录会被排除）；这项 grant 由机器级 Sandbox 组持有；
+- 因为 Sandbox 组是机器级的，同一台机器上其他有权使用 Sandbox 的本地用户，也可能通过自己的 Sandbox 命令读取已 grant 的目录；
+- 在多人共用的 Windows 主机上，应使用 `--skip-profile-grant` / `skipProfileGrant: true`，或撤销已有 Profile grant；不要把单用户开发机的默认安装假设套到共享主机。
+
+因此，`srt-win` 的专用用户并不等于“每个租户拥有独立 Sandbox 用户”。共享主机需要额外验证本地用户之间的读写隔离、持久 ACL grant 和代理身份。
