@@ -243,3 +243,31 @@ https://cursor.com/blog/secure-sandbox
 - `sandbox.json`：配置 Sandbox 能访问的路径、网络域名、临时目录等。
 
 这两个文件不是一个总开关。即使 Permission 允许某个动作，也不代表 Sandbox 自动授予该动作需要的文件或网络能力。
+
+
+## 12. Auto-review 不只审查 Shell
+
+当前 Cursor Auto-review 也适用于 MCP 和 Fetch 工具调用：
+
+    allowlisted shell / MCP / Fetch
+       → run outside Sandbox
+
+    other shell commands
+       → Sandbox when supported
+
+    shell cannot use Sandbox / sandboxed command fails
+       → LLM Classifier review
+
+    other MCP / Fetch calls
+       → LLM Classifier review
+
+    classifier allows
+       → action can run outside Sandbox
+
+因此不要把 Cursor Auto-review 画成“Shell Sandbox 的一层 Kernel 防护”。它是跨工具调用的审批 / 风险判断流程，真正的 OS Sandbox 当前主要用于受支持的 Terminal Shell 命令。
+
+## 13. Cursor 网络默认行为
+
+Cursor 的 Sandbox 默认阻止任意网络访问；网络模式可选择仅使用 `sandbox.json` allowlist、allowlist 加 Cursor 内置默认域名，或允许全部网络。当前默认网络模式是 allowlist + 内置默认域名。
+
+这和 VS Code Copilot Harness 的 `allowNetwork=true` 默认值不同，不能把不同产品的默认配置混成一套。
