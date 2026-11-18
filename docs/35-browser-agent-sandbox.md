@@ -44,7 +44,9 @@ Browser Agent 的核心资产是：
 
 所以：
 
-> Browser Profile 本身就是 Credential Boundary。
+> Browser Profile 是 Credential Boundary 的一部分。
+
+必须使用独立、受控的 Profile；不要把用户日常 Chrome Profile、真实 Cookie、密码库或扩展配置直接挂载给 Agent。若确实需要登录态，应通过专用账号、短期会话或受控凭证代理提供，并限定可访问的站点和操作。
 
 ## 3. 正确模型
 
