@@ -2,7 +2,7 @@
 
 这一实验只做一件事：
 
-> 让一个正常的 Linux C 程序在运行过程中禁止 mkdir 系统调用。
+> 让一个正常的 Linux C 程序在运行过程中禁止 `mkdirat` 系统调用。
 
 目的不是做生产 Sandbox，而是亲眼看到：
 
@@ -39,10 +39,10 @@
 2. 默认允许 syscall；
 3. 添加原生架构的 `mkdir` syscall → EPERM 规则；
 4. 加载 filter；
-5. 通过 `syscall(SCMP_SYS(mkdir), ...)` 直接发起这个 syscall；
+5. 通过 `syscall(SCMP_SYS(mkdirat), AT_FDCWD, ...)` 直接发起这个 syscall；
 6. 观察 Kernel 返回 EPERM。
 
-这里直接调用目标 syscall，而不是依赖 `mkdtemp()` 或 libc 包装函数，避免不同 libc 版本选择 `mkdir` / `mkdirat` 时产生歧义。
+这里直接调用目标 syscall，而不是依赖 `mkdtemp()` 或 libc 包装函数；使用 `mkdirat` 也能避免不同架构的 libc 选择不同底层 syscall 所产生的歧义。
 
 ## 你要观察什么
 
@@ -54,7 +54,7 @@
         ↓
     syscall(SCMP_SYS(mkdir), ...)
         ↓
-    mkdir syscall
+    mkdirat syscall
         ↓
     Kernel
         ↓
@@ -72,7 +72,7 @@
 
 然后关注：
 
-    mkdir
+    mkdirat
     openat
     write
     exit_group
@@ -107,6 +107,6 @@ seccomp 不是：
 
 而是：
 
-    “当进程向 Kernel 请求 mkdir syscall 时，Kernel 根据 filter 决定如何处理。”
+    “当进程向 Kernel 请求 mkdirat syscall 时，Kernel 根据 filter 决定如何处理。”
 
 这就是 Kernel-level enforcement。
