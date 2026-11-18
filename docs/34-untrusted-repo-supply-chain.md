@@ -22,36 +22,18 @@ Agent：
 
     不可信第三方。
 
-## 2. package install 就是执行代码
+## 2. 依赖安装与构建为什么是执行风险
 
-例如：
+不同生态的执行路径不同：
 
-    npm install
+- `npm install` 可能触发依赖包声明的 lifecycle scripts；
+- `pip install` 从 source distribution 构建时会运行 PEP 517 build backend；预构建 wheel 的安装路径不同，不能说每个 wheel 都执行任意安装脚本；
+- `cargo build` 可能运行依赖包的 `build.rs`；
+- Go 模块下载通常不执行模块构建脚本，但 `go test`、构建工具和生成器会执行代码。
 
-可能触发：
+因此更准确的结论是：
 
-    lifecycle scripts
-
-Python：
-
-    pip install
-
-可能下载：
-
-    native wheel
-    build dependency
-
-Rust：
-
-    cargo build
-
-也可能运行：
-
-    build.rs
-
-因此：
-
-> Dependency Installation 是 Code Execution。
+> 依赖获取、构建、安装脚本和测试链路中存在不可信代码执行点，应在 Sandbox 中运行。
 
 ## 3. README 也是攻击面
 
@@ -193,3 +175,20 @@ AI Agent Supply Chain：
 ## 9. 核心结论
 
 > 对 AI Coding Agent 来说，“执行依赖安装”就是“执行第三方代码”，因此必须进入 Threat Model。
+
+
+## 10. 不要把所有包管理器命令混成同一种风险
+
+建议把流程拆成：
+
+    resolve dependency
+       ↓
+    download artifact
+       ↓
+    verify checksum / signature / source
+       ↓
+    build / lifecycle scripts
+       ↓
+    test / execute
+
+其中下载、构建和运行的风险不同。可以为下载阶段配置受限网络，为构建阶段配置更严格的文件和进程策略，并避免将私有 Registry Token 写入持久 Cache 或日志。
