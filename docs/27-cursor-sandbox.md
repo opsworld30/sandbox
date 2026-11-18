@@ -51,73 +51,71 @@ Cursor 的公开文档把：
        ↓
     直接放行
 
-## 3. 为什么 Classifier 不是 Security Boundary
+## 3. Cursor Auto-review Classifier 不是 Security Boundary
 
-Classifier 是模型。
+Cursor 当前 Auto-review 使用后端 LLM Classifier 审查某些不在 Sandbox 内执行的动作，以及 Sandbox 失败后申请在 Sandbox 外重试的动作。
 
-模型会：
+Classifier 可能误判：
 
     false positive
     false negative
 
 因此：
 
-    “模型认为安全”
+    “Classifier 认为安全”
 
-不能替代：
+不等于：
 
-    OS enforcement
+    OS enforcement 已允许
 
-例如：
+反过来，Sandbox 也不能只依赖 Classifier 的结论。真正的文件和网络边界仍由 Sandbox policy 与 OS enforcement 实现。
 
-    Classifier:
-    “curl example.com 应该没问题”
+## 4. Cursor 当前 Sandbox 覆盖什么
 
-但真正 Sandbox：
+Cursor 文档明确把 Sandbox 描述为对**受支持的 Terminal / Shell 命令**施加约束，主要涉及：
 
-    network = deny
-
-最终还是：
-
-    DENIED
-
-## 4. Cursor 的一个重要思想
-
-公开文档中，sandboxed terminal 可以限制：
-
-- workspace；
+- workspace 文件；
 - protected paths；
-- network；
+- network allowlist；
 - temporary directories；
-- extra read/write paths。
+- extra read / write paths。
 
-某些需要完整系统权限的命令可能不能在 Sandbox 中执行。
+平台实现：
 
-这说明：
+    macOS
+      → Seatbelt via sandbox-exec
 
-> Sandbox 不是要求“所有命令都必须成功”，而是优先让安全范围内的命令自动运行。
+    Linux
+      → native sandbox with Landlock
+      → bubblewrap fallback
 
-## 5. 为什么允许“不进入 Sandbox”的命令
+Linux 环境还可能在 Sandbox 内看到 user namespace 映射后的 UID（例如 UID 0），不能把容器内的 UID 直接理解成宿主机真实 UID。
 
-例如：
+这说明：Sandbox 不是要求“所有命令都必须成功”，而是优先让安全范围内的命令自动运行。
 
-    xcodebuild
-    docker
-    privileged system operation
+## 5. Cursor 的 Auto-review 流程很值得研究
 
-可能依赖宿主机能力。
+当前文档描述的顺序大致是：
 
-因此真实产品通常需要：
-
-    Command
+    Agent Tool Call
        ↓
-    Can sandbox?
-       ├── YES → sandbox
-       └── NO  → permission / review
+    allowlisted call?
+       ├── yes → run outside sandbox
+       └── no
+            ↓
+    shell command supported by sandbox?
+       ├── yes → run in sandbox
+       └── no → Auto-review classifier
+                    ↓
+                 allow / block / ask
 
-这是一种：
+如果 Sandbox 内命令因权限限制失败，也可以进入 Classifier review，再决定是否允许 Sandbox 外重试。
 
-> Capability-aware execution
+因此必须修正一个常见误解：
+
+> Cursor 并不是“永远不允许 Sandbox 外执行”；它可以经过 Auto-review / approval 流程放行某些外部执行。
+
+这也意味着用户必须理解：批准 Sandbox 外执行会移除该次操作的文件系统和网络限制。
 
 ## 6. Sandbox JSON 和 Permission JSON 为什么应该分开
 
@@ -181,29 +179,16 @@ Project：
 
     DENY
 
-## 8. Cursor 的一个关键安全思想
+## 8. Cursor 的关键安全提醒
 
-如果一个 sandboxed command 失败：
+Cursor 当前 Auto-review 允许 Sandbox 失败的命令进入 Classifier review；Classifier 可能允许它在 Sandbox 外执行，也可能阻止并要求 Agent 换方案或向用户请求批准。
 
-    permission denied
+因此教学重点不是“产品绝不降级”，而是：
 
-不能简单认为：
-
-    “Sandbox 太麻烦了”
-
-然后自动：
-
-    run unrestricted
-
-更合理：
-
-    Sandbox failure
-       ↓
-    understand reason
-       ↓
-    classify
-       ↓
-    ask user / alternative
+1. 区分 Sandbox 内执行与 Sandbox 外执行；
+2. 理解 classifier 只是决策辅助，不是强制隔离；
+3. 观察用户是否会被明确告知外部执行；
+4. 设计自己的 Runtime 时，避免静默、自动、无审批地从 Sandbox 降级到 unrestricted。
 
 ## 9. 实验：自己实现 Effective Policy
 
@@ -237,12 +222,24 @@ Project：
 
 为什么 Classifier 不能代替 Sandbox？
 
-因为 Classifier 是概率模型，Sandbox 是技术强制边界。前者可以判断，后者负责最终 enforcement。
+因为 Classifier 是概率模型，可能误判；Sandbox 是在进程实际执行时强制限制文件、网络等能力。前者是风险判断，后者是技术 enforcement。
 
 ## 参考
 
 Cursor Run Modes:
 https://cursor.com/docs/agent/security/run-modes
 
-Cursor sandbox:
-https://cursor.com/docs/agent/security/run-modes
+Cursor sandbox engineering deep dive:
+https://cursor.com/blog/secure-sandbox
+
+**核验日期：2026-11-18。** Run Modes、Classifier 模型和平台实现会随 Cursor 版本变化。
+
+
+## 11. 配置文件各自负责什么
+
+当前 Cursor 文档区分：
+
+- `permissions.json`：引导 Auto-review 哪些操作倾向于自动允许或阻止；
+- `sandbox.json`：配置 Sandbox 能访问的路径、网络域名、临时目录等。
+
+这两个文件不是一个总开关。即使 Permission 允许某个动作，也不代表 Sandbox 自动授予该动作需要的文件或网络能力。
