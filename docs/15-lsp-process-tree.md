@@ -86,7 +86,7 @@ Language Server 可能：
        +
     LSP Sandbox
 
-应该一致。
+都需要独立且最小化的 Policy。LSP 通常只需要读取 Workspace 和有限的进程能力，不应因为 Agent Shell 可以写文件或联网，就自动继承同样宽泛的权限。
 
 ## 5. Process Tree 的继承
 
