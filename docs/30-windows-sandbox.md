@@ -196,7 +196,9 @@ Windows Native Sandbox 使用 Low Mandatory Level（MIC），并用 `icacls` 设
 
 ### Anthropic sandbox-runtime
 
-独立的 `@anthropic-ai/sandbox-runtime` Windows 支持目前标注为 Alpha，使用专用 `srt-sandbox` 本地用户、Windows Filtering Platform（WFP）出站过滤、write-restricted token 和文件系统 ACE。
+独立的 `@anthropic-ai/sandbox-runtime` Windows 支持目前标注为 Alpha。默认 `srt-win` Backend 使用专用 `srt-sandbox` 本地用户、Windows Filtering Platform（WFP）出站过滤、write-restricted token、Job Object 和文件系统 ACE。
+
+当前项目还提供可选的 `mxc` Backend：在支持的 Windows BaseContainer 环境中通过 MXC SDK 执行，不使用 `srt-sandbox` 用户和 ACL 安装流程。两种 Backend 不能混为一谈；`mxc` 需要匹配的 Windows build 与可用 SDK。
 
 这不是 Claude Code Native Windows Bash Sandbox；Claude Code 产品本身的本地 Bash Sandbox 文档仍要求 Windows 用户使用 WSL2 或容器环境。
 
@@ -233,6 +235,6 @@ https://openai.com/index/building-codex-windows-sandbox/
 
 ## 13. WFP 的边界不能被忽略
 
-Anthropic sandbox-runtime 的 Windows Alpha 文档明确列出 WFP 方案的限制：过滤器以专用 Sandbox 用户的 SID 为条件，若受限进程在创建 Socket 前把另一个 Token 应用到线程，或由系统服务代为发起网络流量，过滤器未必能按预期跟踪该动作。
+Anthropic sandbox-runtime 的 Windows Alpha `srt-win` Backend 文档明确列出 WFP 方案的限制：过滤器以专用 Sandbox 用户的 SID 为条件，若受限进程在创建 Socket 前把另一个 Token 应用到线程，或由系统服务代为发起网络流量，过滤器未必能按预期跟踪该动作。
 
-因此 WFP 过滤器不是“所有网络都无条件封死”的魔法开关。需要把 Token 变更、服务代发流量、Loopback Proxy、进程树和实际 Socket 创建身份纳入测试。
+因此 WFP 过滤器不是“所有网络都无条件封死”的魔法开关。需要把 Token 变更、服务代发流量、Loopback Proxy、进程树和实际 Socket 创建身份纳入测试。注意这些限制针对 `srt-win` Backend，不能直接套用到可选的 MXC Backend。
