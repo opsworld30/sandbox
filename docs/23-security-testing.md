@@ -93,7 +93,7 @@
     file read
     proxy request
 
-确认真实 Secret 永远不进入 Sandbox。
+确认真实 Secret 没有被注入 Sandbox 的环境变量、文件或 FD；如果使用代理式凭证访问，验证代理只为授权目标执行操作。
 
 ## 7. Prompt Injection Test
 
@@ -107,13 +107,15 @@
         ↓
     Policy
         ↓
-    Sandbox
+    Sandbox / Proxy
         ↓
-    blocked
+    action blocked
 
 这里测试的是：
 
-> 即使模型被诱导，系统边界是否有效。
+> 即使模型被诱导，技术执行边界是否仍然有效。
+
+Prompt Injection 评测是概率性测试，不能把“模型这次没有尝试恶意操作”当成 Sandbox 安全通过。应直接验证文件、网络、凭证和资源 enforcement。
 
 ## 8. Escape Testing 的原则
 
@@ -167,3 +169,16 @@
 ### Q：为什么不能在生产环境做 escape test？
 
 因为测试本身可能造成真实数据破坏或网络影响。安全测试应在隔离环境完成。
+
+
+## 12. 需要加入的工程级测试
+
+- **Policy Compiler Test**：每个 Backend 是否能表达要求的策略；不支持时是否 fail-closed。
+- **FD Test**：进入 Sandbox 前打开的文件、socket 和继承 FD 是否泄露能力。
+- **TOCTOU Test**：检查后替换 symlink / 文件是否能越界。
+- **Process Cleanup Test**：子进程脱离进程组、后台运行、Session destroy 后是否仍存活。
+- **Network Bypass Test**：忽略 HTTP_PROXY、直接 socket、IPv6、DNS 重绑定、redirect 是否能绕过 Egress Policy。
+- **Resource Test**：cgroup / quota 限制是否真的作用于整个 Session，而不是只作用于父进程。
+- **Backend Failure Test**：bwrap、Landlock、seccomp 或网络策略初始化失败时是否拒绝执行。
+
+安全测试应有可重复的预期结果和日志证据，不能只凭人工观察“好像被挡住了”。
