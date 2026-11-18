@@ -164,3 +164,10 @@ Language Server 可能：
 生产系统应优先使用可对整个 Session 生效的 OS 资源边界，例如 Linux cgroup v2 的进程集合，或 Windows Job Object。销毁时先终止该边界，再验证其中没有残留进程。
 
 PTY 只是终端交互设备，不是进程隔离机制；PTY helper、shell 和其子进程必须处在同一 Sandbox 边界中。
+
+## 本讲实验代码
+
+- [Process Tree 清理](../labs/09-process-tree/README.md)
+- [LSP / Tool Capability 分权](../labs/15-tool-capabilities/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
