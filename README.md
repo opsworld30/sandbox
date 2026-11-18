@@ -71,7 +71,7 @@ AI Agent 最终会执行：
 
 ### 第五阶段：主流 AI Coding Sandbox 实战拆解
 25. Codex Sandbox：Permission → Sandbox Manager → OS Backend
-26. Claude Code Bash Sandbox：Filesystem + Network，以及工具覆盖边界
+26. Claude Code 本地命令 Sandbox：Bash / PowerShell / Monitor 与工具覆盖边界
 27. Cursor Sandbox：Permission / Sandbox / Classifier 分层
 28. VS Code Agent Sandbox：Terminal 与托管 MCP / LSP 的隔离范围
 29. Gemini CLI Sandbox：Tool-level Sandbox 与动态扩权
