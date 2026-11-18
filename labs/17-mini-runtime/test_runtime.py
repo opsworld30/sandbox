@@ -7,6 +7,7 @@ class MiniRuntimeTests(unittest.TestCase):
     def setUp(self):
         self.runtime = MiniRuntime()
         self.session = self.runtime.create_session()
+        (self.runtime.root / "outside.txt").write_text("outside", encoding="utf-8")
 
     def tearDown(self):
         self.runtime.close()
@@ -21,7 +22,7 @@ class MiniRuntimeTests(unittest.TestCase):
             self.runtime.exec(self.session, ["sh", "-c", "id"])
 
     def test_path_escape_is_denied(self):
-        with self.assertRaises((PolicyDenied, FileNotFoundError)):
+        with self.assertRaises(PolicyDenied):
             self.runtime.exec(self.session, ["cat", "../outside.txt"])
 
     def test_destroy_removes_session(self):
