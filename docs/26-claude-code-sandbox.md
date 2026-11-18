@@ -96,7 +96,7 @@ Claude Code 的公开设计把两个边界放在一起：
       → 本机 Sandbox Proxy
       → 可选 seccomp filter
 
-Native Windows 不提供 Claude Code Bash Sandbox；Windows 用户需要通过 WSL2 或容器使用支持的 Linux 环境。
+Native Windows 不提供 Claude Code 本地命令 Sandbox；Windows 用户需要通过 WSL2 或容器使用支持的 Linux 环境。
 
 **产品覆盖范围：** 当前本地 Sandbox 对 Bash、PowerShell、Monitor 工具命令及其子进程施加 OS 级文件系统和网络限制；具体工具是否可用取决于运行平台。它不是整个 Claude Code 进程的统一边界。官方明确列出的 Sandbox 外组件包括 Read / Edit / Write 等内置文件工具、WebFetch / WebSearch、hooks、本地 MCP servers、plugin monitors、LSP servers、helper commands，以及 Mods 在 Claude Code 进程内执行的代码。特别注意：`network.allowedDomains` 限制的是 Sandbox 内命令的网络，不会自动限制 WebFetch 等进程内工具。若要把这些组件也纳入同一边界，需要把 Claude Code 整体运行在 Container、VM 或独立 sandbox-runtime 内。
 
@@ -252,7 +252,7 @@ Claude Code 本地命令 Sandbox 展示的是：
       +
     Permission / fallback controls
 
-但 Claude Code 的 File tools、MCP servers、hooks 不应被默认视为已包含在同一个 Bash Sandbox 内。
+但 Claude Code 的 File / Web tools、MCP servers、hooks、LSP、plugin monitors 和 helper commands 不应被默认视为已包含在同一个命令 Sandbox 内。
 
 Anthropic Cloud Session 则展示：
 
@@ -294,7 +294,7 @@ Proxy 默认不终止或检查 TLS 流量，因此通常只能按请求的 hostn
 
 ## 12. Claude Code Sandbox 的默认开关和失败回退必须讲清
 
-截至 2026-11-18，Claude Code 本地 Bash Sandbox：
+截至 2026-11-18，Claude Code 本地命令 Sandbox：
 
 - 默认关闭，需要在会话中启用或通过设置开启；
 - 如果平台不支持或依赖检查失败，默认可能回退到无 Sandbox 的命令执行；
@@ -335,6 +335,6 @@ Claude Code 官方文档指出，Sandboxed command 默认继承 Claude Code 的�
 
 ## 15. Cloud Session 的网络默认值
 
-Claude Code on the web 的网络控制和本地 Bash Sandbox 是不同配置面。Anthropic-hosted Cloud Session 默认使用受限网络访问；可访问的服务、依赖安装能力和 GitHub Proxy 行为由 Cloud Session 的网络设置决定。即使关闭一般网络，Session 仍可与 Anthropic API 通信，因此“关闭外网”不等于“没有任何数据离开 VM”。不要把本地 Sandbox 的 `allowedDomains` 配置直接套用到 Cloud Session，也不要假设 GitHub 代理凭证会进入 VM。
+Claude Code on the web 的网络控制和本地命令 Sandbox 是不同配置面。Anthropic-hosted Cloud Session 默认使用受限网络访问；可访问的服务、依赖安装能力和 GitHub Proxy 行为由 Cloud Session 的网络设置决定。即使关闭一般网络，Session 仍可与 Anthropic API 通信，因此“关闭外网”不等于“没有任何数据离开 VM”。不要把本地 Sandbox 的 `allowedDomains` 配置直接套用到 Cloud Session，也不要假设 GitHub 代理凭证会进入 VM。
 
 参考：https://code.claude.com/docs/en/claude-code-on-the-web
