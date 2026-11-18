@@ -192,3 +192,11 @@ https://github.com/openai/codex/blob/main/codex-rs/sandboxing/src/manager.rs
 ## 参考补充
 
 Landlock ABI / access rights：https://www.kernel.org/doc/html/latest/userspace-api/landlock.html
+
+## 本讲实验代码
+
+- [seccomp syscall filter](../labs/01-seccomp/README.md)
+- [Landlock 文件系统隔离](../labs/02-landlock/README.md)
+- [Namespace 与 bubblewrap](../labs/04-bubblewrap/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
