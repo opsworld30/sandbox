@@ -270,7 +270,7 @@ Landlock 默认通过 `landlock_restrict_self()` 限制调用线程及其后代�
 
 Kernel 文档明确列出一些 Landlock 目前不能单独限制的文件相关操作，例如：
 
-- `stat` / `access`；
+- `chdir`、`stat` / `access`；
 - `chmod` / `chown`；
 - `flock`；
 - `setxattr` / `utime`；
