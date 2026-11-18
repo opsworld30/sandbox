@@ -411,3 +411,66 @@ https://man7.org/linux/man-pages/man2/PR_SET_SECCOMP.2const.html
 
 Docker Seccomp:
 https://docs.docker.com/engine/security/seccomp/
+
+
+## 17. 对应实战代码
+
+本仓库提供一个最小 libseccomp 实验：
+
+    labs/01-seccomp/seccomp_demo.c
+
+它故意使用：
+
+    default = ALLOW
+    mkdir = ERRNO(EPERM)
+
+原因是教学阶段我们只想观察一个明确的变化：
+
+    普通程序
+      ↓
+    mkdir
+      ↓
+    success
+
+变成：
+
+    seccomp loaded
+      ↓
+    mkdir
+      ↓
+    Kernel
+      ↓
+    EPERM
+
+这比直接给一个巨大 allowlist 更适合第一次理解 seccomp。
+
+运行：
+
+    cd labs/01-seccomp
+    make
+    ./seccomp_demo
+
+### 18. 为什么这个例子比“read / write / open allowlist”更适合入门
+
+因为生产级 allowlist 很容易让初学者陷入：
+
+    “到底允许多少 syscall？”
+
+但第一次学习 seccomp 真正应该理解的是：
+
+    1. filter 是进程的一部分；
+    2. filter 被加载到 Kernel；
+    3. syscall 发生时 Kernel 会检查；
+    4. 命中规则后可以返回 EPERM；
+    5. 没命中的 syscall 继续执行。
+
+等这个模型理解后，再学习：
+
+    default deny
+    syscall allowlist
+    argument filtering
+    USER_NOTIF
+    filter stacking
+    TSYNC
+
+会容易很多。
