@@ -289,3 +289,9 @@ Cursor 当前 Read Access 的默认模式是 `System`，Agent 不会被强制限
 不能只开启 Shell Sandbox，就推断 Agent 的所有文件读取都只限于当前 Workspace。Read Access 也不适用于 `Run Everything` 模式；该模式会自动执行所有 Tool Call，不走这些读取审批检查。
 
 当前公开的本地 Sandbox 平台选项为 macOS 与 Linux；不要把这套实现直接推断到 Windows。
+
+## 本讲实验代码
+
+- [Effective Policy Engine](../labs/08-policy-engine/README.md)
+
+这些是对应主题的可运行教学实验或产品设计复现；并非厂商内部实现的源码副本。
