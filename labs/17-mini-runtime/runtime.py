@@ -62,6 +62,9 @@ class MiniRuntime:
         ):
             raise ValueError("argv must be a non-empty list of strings")
 
+        if sum(len(item) for item in argv) > 4096:
+            raise ValueError("argv payload exceeds 4096 characters")
+
         name, *args = argv
         executable = self.COMMANDS.get(name)
         if executable is None:
@@ -81,6 +84,8 @@ class MiniRuntime:
                 raise PolicyDenied("path escapes workspace") from exc
             if not target.is_file():
                 raise PolicyDenied("cat target must be a regular file")
+            if target.stat().st_size > 1024 * 1024:
+                raise PolicyDenied("cat target exceeds the 1 MiB teaching limit")
             args = [str(target)]
         if name == "echo" and len(args) > 32:
             raise ValueError("too many echo arguments")
