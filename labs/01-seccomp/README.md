@@ -52,7 +52,7 @@
         ↓
     seccomp_load(...)
         ↓
-    mkdtemp(...)
+    syscall(SCMP_SYS(mkdir), ...)
         ↓
     mkdir syscall
         ↓
