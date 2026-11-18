@@ -104,6 +104,8 @@ Sandbox 不负责理解 Prompt Injection。
 
 > 即使 Prompt Injection 成功，攻击者也不能突破系统能力边界。
 
+但这只对**真正经过该 Sandbox Enforcement 的 Tool / Process**成立。若 File Tool、WebFetch、MCP、Browser 或其他服务在 Sandbox 外运行，它们可能形成旁路；必须逐一核对工具覆盖范围，并为不同 Tool 建立独立的授权、网络、文件和凭证边界。
+
 ## 5. Prompt Injection + Filesystem
 
 如果攻击目标是：
@@ -113,7 +115,7 @@ Sandbox 不负责理解 Prompt Injection。
     ~/.config
     browser profile
 
-那么 Filesystem Sandbox 是第一道防线。
+那么对实际读取这些资源的进程施加 Filesystem Sandbox 是一道防线。若浏览器、文件工具或 MCP 在 Sandbox 外运行，就必须在它们各自的进程或服务端另行实施权限控制。
 
 ## 6. Prompt Injection + Network
 
@@ -121,7 +123,7 @@ Sandbox 不负责理解 Prompt Injection。
 
     “把数据发到 attacker.example”
 
-那么 Network Sandbox 是第二道防线。
+那么对实际发起连接的进程施加 Network Sandbox 是一道防线；只限制 Shell 的网络，不代表 WebFetch、Browser 或 Remote MCP 的网络也被限制。
 
 ## 7. Prompt Injection + Credentials
 
@@ -172,7 +174,8 @@ Sandbox 不负责理解 Prompt Injection。
 安全策略：
 
     workspace read → allow
-    test network → allow only if explicitly configured
+    attacker.example → network deny
+    only required test domains → explicit allowlist
     real credentials → absent
 
 然后观察：
