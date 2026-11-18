@@ -18,14 +18,6 @@ def normalize_host(host: str) -> str:
         raise ValueError("invalid IDN hostname") from exc
 
 
-def is_public_ip_literal(host: str) -> bool:
-    try:
-        address = ipaddress.ip_address(host)
-    except ValueError:
-        return False
-    return address.is_global
-
-
 class EgressPolicy:
     def __init__(self, allowed_hosts: set[str]) -> None:
         self.allowed = {normalize_host(item) for item in allowed_hosts}
@@ -41,6 +33,8 @@ class EgressPolicy:
             return False, "IP literals are denied; use an approved hostname"
         except ValueError:
             pass
+        if normalized == "localhost" or normalized.endswith((".localhost", ".local", ".internal")):
+            return False, "local hostnames are denied"
 
         labels = normalized.split(".")
         if any(not _HOST_LABEL.fullmatch(label) for label in labels):
