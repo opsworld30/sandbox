@@ -101,3 +101,20 @@ https://github.com/anthropic-experimental/sandbox-runtime
 
 VS Code Agent Sandboxing:
 https://code.visualstudio.com/docs/agents/run/agent-sandboxing
+
+
+## Hands-on Labs
+
+- Lab 01：seccomp 最小实验
+  - [实验说明](labs/01-seccomp/README.md)
+  - [C 代码](labs/01-seccomp/seccomp_demo.c)
+  - [Makefile](labs/01-seccomp/Makefile)
+
+后续会继续补充：
+
+- Landlock 实验；
+- bubblewrap 实验；
+- network proxy 实验；
+- workspace boundary 实验；
+- Prompt Injection + Sandbox 实验；
+- Sandbox Runtime 综合项目。
