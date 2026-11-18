@@ -160,8 +160,6 @@ Agent SSRF：
 
 不要只关注 TCP。
 
-例如：
-
     /var/run/docker.sock
 
 如果 Agent 可以访问 Docker daemon：
@@ -173,8 +171,6 @@ Agent SSRF：
     Docker daemon
       ↓
     high privilege control
-
-所以：
 
 > Unix socket 是本地 Sandbox 中经常被忽略的高价值边界。
 
@@ -235,24 +231,6 @@ Agent SSRF：
 ### Q3：为什么 docker.sock 风险很高？
 
 它可能把 Agent 的权限边界直接连接到 Docker daemon，而 daemon 的控制能力远高于普通 workspace。
-
-
-## 13. Domain Allowlist 与 Kernel Network Policy 的区别
-
-- Landlock 的 TCP / UDP 网络权限按端口控制（并受 ABI 版本约束），不是 FQDN / 域名白名单。
-- HTTP(S) Proxy 可以按 CONNECT 主机名 / 端口做策略，但前提是进程流量无法绕过 Proxy。
-- Firewall / Network Namespace 用来阻止 direct socket 或未授权网络路径。
-- DNS 规则还要考虑重绑定、CNAME、redirect、IPv4 / IPv6 和解析后 IP。
-
-仅设置 `HTTP_PROXY` / `HTTPS_PROXY` 环境变量不是强制边界，程序可以忽略它们并直接创建 socket。
-
-## 14. Unix Domain Socket 是独立边界
-
-Network Namespace 主要隔离网络栈，不会自动替你隐藏所有 Unix Domain Socket 路径。像 Docker Socket、SSH Agent Socket、宿主机服务 Socket，应通过 Mount Namespace / 文件系统策略、FD 继承控制和服务端授权一起限制。
-
-## 15. 产品实现要分开核对
-
-例如 Claude Code 的本地 Bash Sandbox 在 Linux / WSL2 使用独立 Network Namespace，并通过本机 Sandbox Proxy 处理允许的域名；macOS 使用 Seatbelt 限制直接连接并允许访问代理。这个实现不能推导成所有 AI Coding 工具都采用相同方案。
 
 ## 13. Domain Allowlist 与 Kernel Network Policy 的区别
 
