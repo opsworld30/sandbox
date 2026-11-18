@@ -202,3 +202,37 @@
 - VS Code Copilot Harness 的默认 Git HTTPS 与 GitHub CLI 认证均可在 Sandbox 中使用；Sandbox 开启后缺少依赖时，默认工具不会静默退回无 Sandbox 执行。
 - OpenAI Agents API Pre-warm Environment 可以被多个 Session 共享；共享后文件、进程、包和环境配置也共享，不应把多个 Session 误认为多个隔离 workspace。
 - Anthropic sandbox-runtime 的 Windows `srt-win` 为 Alpha；可选 MXC Backend 为 Experimental，需要 BaseContainer 与 Node.js 24+，不支持时不自动回退。两种 Backend 的隔离实现不同；`srt-win` 的 Sandbox 用户 / 组是机器级，Profile grant 在共享 Windows 主机上会形成跨本地用户的读取风险。
+
+## 8. 实验覆盖补齐（2026-11-18）
+
+本轮针对“实验章节只有目录、命令草图或伪代码”的问题，新增 Lab 03～Lab 23，共 21 个独立实验目录。连同原有 Lab 01（seccomp）和 Lab 02（Landlock），目前共 **23 个 Lab**。
+
+新增实验覆盖：
+
+- Runner / Session / Process Tree；
+- bubblewrap / macOS Seatbelt；
+- Network Egress Policy；
+- Fake Credential Broker；
+- Effective Policy / Tool Capability / Command-scoped Expansion；
+- npm Lifecycle / Supply Chain；
+- Git Worktree / Snapshot / Cache；
+- Audit / Secret Redaction；
+- Multi-Agent Workspace / Artifact Broker；
+- Resource Limits；
+- Remote Session API / Mini Runtime；
+- Security Regression Matrix；
+- Windows Sandbox 配置；
+- Prewarm Pool 生命周期；
+- MCP stdio / JSON-RPC 最小 Server。
+
+课程第 1～44 讲均已追加“本讲实验代码”入口，根目录 README 与 [Lab 索引](../labs/README.md) 已同步。
+
+**验证状态必须如实区分：**
+
+- 代码与 README 已提交到仓库；
+- 本轮没有在目标 Linux VM、macOS 和 Windows 环境逐一执行全部 Lab；
+- Python 单元测试、npm lifecycle、bwrap、Seatbelt、Windows Sandbox、seccomp 和 Landlock 的最终运行结果仍需在对应环境实测；
+- Lab 03、06～08、12～13、15、17～19、21、23 属于应用层教学原型或策略模拟，不能当作 OS-level Enforcement；
+- Lab 04、05、14、20 和原有 Lab 01 / 02 依赖特定 OS / Kernel / 系统能力，必须按各自 README 的前置条件执行。
+
+完整目录、章节映射和推荐顺序见 [labs/README.md](../labs/README.md)。
