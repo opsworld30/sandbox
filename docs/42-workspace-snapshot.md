@@ -47,11 +47,7 @@ Agent 会修改很多文件：
 
 ## 3. 为什么 Git 不完全够
 
-Git 主要记录：
-
-    tracked source
-
-但 Agent 可能创建：
+Git 主要记录版本化的仓库内容；Agent 还可能创建：
 
     node_modules
     .cache
@@ -61,7 +57,9 @@ Git 主要记录：
 
 这些不一定进入 Git。
 
-所以：
+而 Git Worktree 还会共享部分 common Git metadata / object database，所以它也不是完整的状态隔离。
+
+因此：
 
     Git Checkpoint
       !=
@@ -227,3 +225,18 @@ Snapshot 是：
     “即使它改坏了，也能回来”
 
 两者应该一起设计。
+
+
+## 12. Snapshot 的一致性和敏感数据问题
+
+创建 Snapshot 前要决定是否停止进程、flush 文件缓冲、冻结写入或使用文件系统 / VM 提供的一致性快照。否则 Snapshot 可能包含不一致状态。
+
+恢复时还要特别注意：
+
+- 不应无意恢复旧的凭证、Cookie、SSH Agent 状态；
+- 不应把 Tenant A 的 Snapshot 恢复到 Tenant B；
+- Snapshot 应加密、做访问控制、保留期限和删除策略；
+- Snapshot 恢复不能降低当前 Session 的安全策略版本；
+- 不要把旧的网络连接和临时 Socket 当成可安全复用状态。
+
+Snapshot 记录的是状态，不是安全授权。恢复时应重新应用当前有效 Policy。
