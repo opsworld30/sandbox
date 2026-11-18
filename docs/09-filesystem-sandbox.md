@@ -261,3 +261,34 @@ Landlock 对通过路径打开和通过已有 FD 访问的对象有细致规则�
 路径规范化和 `realpath()` 检查不能单独防住所有文件系统竞态。文件可能在检查后、打开前被替换；硬链接也意味着不同路径可能指向同一个 inode。
 
 在 Linux 上应结合 Landlock 的 `REFER` 权限、适当的路径解析约束（例如 `openat2` 的 resolve flags）和基于 FD 的操作设计。不要只用字符串前缀判断路径是否位于 workspace。
+
+
+## 11. Landlock 规则不是“自动拒绝一切未列出的行为”
+
+Landlock ruleset 创建时必须明确声明哪些 access rights 由该 ruleset 接管（`handled_access_fs`）。只有被标记为 handled 的访问类型，才会按照 Landlock 规则被拒绝或允许；没有被声明为 handled 的类型仍按其他传统权限检查处理。
+
+因此生产策略要：
+
+1. 查询运行中 Kernel 的 Landlock ABI；
+2. 按 ABI 能力构造 handled 权限；
+3. 对每个允许访问的目录授予明确的权限；
+4. 对不能覆盖的权限使用其他机制补齐；
+5. 如果目标平台无法强制执行关键策略，应拒绝启动或明确降级，不要悄悄当作安全成功。
+
+## 12. 已打开 FD 与路径授权不是同一个问题
+
+Landlock 对通过路径打开和通过已有 FD 访问的对象有细致规则；在进入 Sandbox 前已经打开的文件描述符可能保留原有访问能力，或在后续操作时受到不同的检查。
+
+所以 Runtime 应在进入 Sandbox 前：
+
+- 关闭不需要的文件描述符；
+- 对必须保留的 stdin/stdout/stderr 做明确设计；
+- 不要无条件继承 SSH Agent、Docker Socket、数据库 socket 等 FD；
+- 使用 close-on-exec，并审查 FD passing / Unix socket；
+- 不要把“路径策略已配置”理解成“进程手上没有任何越界能力”。
+
+## 13. Hardlink、REFER 与 TOCTOU
+
+路径规范化和 `realpath()` 检查不能单独防住所有文件系统竞态。文件可能在检查后、打开前被替换；硬链接也意味着不同路径可能指向同一个 inode。
+
+在 Linux 上应结合 Landlock 的 `REFER` 权限、适当的路径解析约束（例如 `openat2` 的 resolve flags）和基于 FD 的操作设计。不要只用字符串前缀判断路径是否位于 workspace。
