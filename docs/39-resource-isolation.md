@@ -295,3 +295,9 @@ seccomp 控制 syscall 能力，cgroups 控制资源消耗。一个限制“能�
 
 - Linux cgroup v2：https://docs.kernel.org/admin-guide/cgroup-v2.html
 - Linux `getrlimit(2)` / `setrlimit(2)`：https://man7.org/linux/man-pages/man2/getrlimit.2.html
+
+## 本讲实验代码
+
+- [CPU / Memory / File Size Limits](../labs/14-resource-limits/README.md)
+
+这些是对应主题的可运行教学实验；实际 OS 隔离能力和模拟策略的区别以各 Lab README 为准。
