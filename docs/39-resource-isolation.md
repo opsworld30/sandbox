@@ -200,9 +200,7 @@ Process tree：
       ├── node
       └── compiler
 
-都进入同一个 cgroup。
-
-于是资源限制天然作用于整个 Session。
+在可信 Host 将 Session 进程放入 cgroup、且不向不可信进程开放迁移权限的前提下，子进程会继承该 cgroup，资源限制作用于整个受控进程集合。不要把“创建了 cgroup”误认为所有后续进程自动无法逃离；还必须保护 cgroupfs 的写权限和生命周期。
 
 ## 10. Resource Policy
 
