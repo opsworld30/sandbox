@@ -132,6 +132,12 @@ int main(void) {
         return 1;
     }
 
+    /* Make the demo repeatable: remove the previous run's output first. */
+    if (unlink("workspace/created.txt") < 0 && errno != ENOENT) {
+        perror("unlink previous workspace/created.txt");
+        return 1;
+    }
+
     struct landlock_path_beneath_attr path_rule = {
         .allowed_access = handled,
         .parent_fd = workspace_fd,
@@ -211,9 +217,13 @@ int main(void) {
 
     if (created_fd >= 0) {
         const char *message = "created inside Landlock workspace\n";
-        write(created_fd, message, strlen(message));
+        ssize_t written = write(created_fd, message, strlen(message));
         close(created_fd);
-        printf("workspace/created.txt: WRITE ALLOW\n");
+        if (written == (ssize_t)strlen(message)) {
+            printf("workspace/created.txt: WRITE ALLOW\n");
+        } else {
+            printf("workspace/created.txt: WRITE INCOMPLETE\n");
+        }
     } else {
         printf("workspace/created.txt: WRITE DENY (%s)\n",
                strerror(errno));
