@@ -192,3 +192,10 @@ AI Agent Supply Chain：
     test / execute
 
 其中下载、构建和运行的风险不同。可以为下载阶段配置受限网络，为构建阶段配置更严格的文件和进程策略，并避免将私有 Registry Token 写入持久 Cache 或日志。
+
+## 本讲实验代码
+
+- [npm Lifecycle / Supply Chain](../labs/10-supply-chain/README.md)
+- [安全回归测试](../labs/18-security-regression/README.md)
+
+这些是对应主题的可运行教学实验；实际 OS 隔离能力和模拟策略的区别以各 Lab README 为准。
