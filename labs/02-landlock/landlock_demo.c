@@ -96,7 +96,7 @@ int main(void) {
     }
 #endif
 #ifdef LANDLOCK_ACCESS_FS_RESOLVE_UNIX
-    if (abi >= 6) {
+    if (abi >= 9) {
         handled |= LANDLOCK_ACCESS_FS_RESOLVE_UNIX;
     }
 #endif
