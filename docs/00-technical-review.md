@@ -42,7 +42,7 @@
 | 15 | 需要修订进程继承 | 明确 IDE 管理进程不一定是 Agent 的子进程；补充 cgroup / Job Object |
 | 16 | 需要明确 Git 语义 | 明确 Git Worktree 不是 OS 安全边界，多个 worktree 共享部分 Git 元数据 |
 | 17 | 需要修订包管理器描述 | 区分 npm lifecycle、pip source build、wheel 安装、Cargo build.rs、Go |
-| 18 | 需要修订云端对象模型 | 区分 Agent Session 与 Environment；不把 Agents API Hosted Sandbox 等同 Codex Cloud |
+| 18 | 需要修订云端对象模型 | 区分 Agent Session 与 Environment；补充 OpenAI Pre-warm 共享 Environment 的多 Session workspace 语义；不把 Hosted Sandbox 等同 Codex Cloud |
 | 19 | 需要修订比较方法 | 移除固定安全等级排序，按内核边界、威胁模型、兼容性、成本比较 |
 | 20 | 需要补充 Enforcement | 区分静态 Policy 决策和运行时 OS 强制执行；补充 Backend capability negotiation / fail-closed |
 | 21 | 需要区分概念 | 区分 Prewarm、Snapshot、Pool；补充跨 Session 复用前的 Reset |
@@ -50,11 +50,11 @@
 | 23 | 需要补充测试项 | 增加 FD、TOCTOU、Network bypass、Policy Compiler、Backend failure 测试 |
 | 24 | 需要补充生产要求 | 补充 argv、路径安全、强制 Egress、cgroup、输出限制、fail-closed |
 | 25 | 产品事实需要修正 | Codex Linux 公开文档描述 bwrap；区分本地、WSL2、Windows Native 与 Cloud |
-| 26 | 产品范围需要修正 | 区分 Claude Code Bash Sandbox、独立 sandbox-runtime、Cloud Session；补充默认关闭和回退设置 |
+| 26 | 产品范围需要修正 | 区分 Claude Code 本地命令 Sandbox、独立 sandbox-runtime、Cloud Session；补充 Bash / PowerShell / Monitor 覆盖范围、Web / File / MCP / LSP 等外部组件、凭证默认可读风险和回退设置 |
 | 27 | 产品行为需要修正 | 补充 Auto-review 对 Shell / MCP / Fetch 的处理、Sandbox 外重试、平台范围和默认网络 |
-| 28 | 产品配置需要修正 | 补充 Copilot Harness 作用范围、默认 off、allowNetwork 默认 true、托管 MCP / LSP 和 Windows Experimental |
-| 29 | 产品能力需要补充 | 补充 Windows Native、gVisor、LXC/LXD、Tool-level Sandbox 和按单次命令扩权 |
-| 30 | Windows 实现需要拆分 | 区分 Codex、Gemini CLI、Anthropic sandbox-runtime、VS Code 的不同 Windows 方案 |
+| 28 | 产品配置需要修正 | 补充 Copilot Harness 作用范围、默认 off、allowNetwork 默认 true、托管 MCP / LSP、GitHub 认证默认值、缺少依赖不静默回退和 Windows Experimental |
+| 29 | 产品能力需要补充 | 补充 Windows Native、gVisor、LXC/LXD、Tool-level Sandbox 和按单次命令扩权；纠正默认网络策略因 Provider / Profile 而异 |
+| 30 | Windows 实现需要拆分 | 区分 Codex、Gemini CLI、Anthropic sandbox-runtime（srt-win / MXC）、VS Code 的不同 Windows 方案 |
 | 31 | 概念正确但需限定 | 固定 Policy Precedence 标为自研设计建议；区分批准一次操作和扩大 Sandbox |
 | 32 | 凭证示例需要修正 | Broker 不应把 Token 返回给 Agent；短期 Token 仍是 Agent 可读取的 Secret |
 | 33 | 需要补充进程清理 | 区分 process group、cgroup、Job Object 与 PTY |
@@ -193,3 +193,12 @@
 8. 不把“没有复现问题”写成“绝对安全”。
 
 这份报告是本轮文档技术审查记录，不替代专业安全审计、代码审计、渗透测试或目标环境验证。
+
+
+### 本轮继续核验的补充事实
+
+- Claude Code 当前本地 Sandbox 不只覆盖 Bash，也覆盖 Bash、PowerShell、Monitor 工具命令及其子进程；Read / Edit / Write、WebFetch / WebSearch、hooks、MCP、LSP、plugin monitors、helpers 等仍在边界之外。
+- Cursor Auto-review 当前由 Cursor 后端小型模型进行，文档列出 Gemini 3.5 Flash Lite 和 Haiku fallback；Classifier 还可能读取本机只读上下文，但不是 OS 安全边界。
+- VS Code Copilot Harness 的默认 Git HTTPS 与 GitHub CLI 认证均可在 Sandbox 中使用；Sandbox 开启后缺少依赖时，默认工具不会静默退回无 Sandbox 执行。
+- OpenAI Agents API Pre-warm Environment 可以被多个 Session 共享；共享后文件、进程、包和环境配置也共享，不应把多个 Session 误认为多个隔离 workspace。
+- Anthropic sandbox-runtime 的 Windows Alpha 当前有默认 `srt-win` 与可选 `mxc` 两种 Backend，不能把 WFP / ACL 实现泛化到 MXC。
