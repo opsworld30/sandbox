@@ -161,3 +161,20 @@ Sandbox 解决运行时访问边界，Worktree 解决代码状态隔离。多 Ag
 ### Q：Snapshot 和 Git commit 有什么区别？
 
 Git 主要保存版本化代码；Snapshot 可以保存完整执行环境和 workspace 状态。
+
+
+## 10. 非常重要：Git Worktree 不是安全边界
+
+Git Worktree 隔离的是多个工作目录的 checkout 状态，便于并行开发；它不是 OS Sandbox。
+
+多个 linked worktree 通常共享同一个 Git common directory / object database，部分 refs 和仓库级元数据也可能共享。拥有足够文件访问权限的 Agent 仍可能影响共享 Git 元数据、hooks、config 或其他工作区。
+
+因此：
+
+    Worktree
+      = code-state / checkout isolation
+
+    Sandbox
+      = process / filesystem / network / credential boundary
+
+多 Agent 场景应当同时使用独立 worktree 和独立 Sandbox，并明确共享的 Git 元数据由谁写入。
