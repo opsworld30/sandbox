@@ -18,7 +18,7 @@ mkdir -p "$WORKSPACE" "$OUTSIDE"
 [[ -f "$OUTSIDE/secret.txt" ]] || echo "secret" > "$OUTSIDE/secret.txt"
 
 echo "Expect the first read to succeed and the second to be denied."
-sandbox-exec -D "WORKSPACE=$WORKSPACE" -f "$ROOT/profile.sb" -- /bin/sh -c '
+/usr/bin/env -i PATH=/usr/bin:/bin HOME="$WORKSPACE" sandbox-exec -D "WORKSPACE=$WORKSPACE" -f "$ROOT/profile.sb" -- /bin/sh -c '
   echo "--- allowed file ---"
   /bin/cat "$1/allowed.txt"
   echo "--- outside file (expected denial) ---"
