@@ -95,7 +95,7 @@
 | 7 | audit logging flags |
 | 8 | `LANDLOCK_RESTRICT_SELF_TSYNC` |
 | 9 | pathname Unix socket 控制 |
-| 10 | UDP bind / connect-send 端口规则 |
+| 10 | UDP bind / connect-send 端口规则、quiet audit flags |
 | 11 | restrict_self 时设置 no_new_privs |
 | 12 | namespace / capability use 限制 |
 
