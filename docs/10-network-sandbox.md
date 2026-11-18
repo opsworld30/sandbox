@@ -36,13 +36,9 @@ Anthropic 在 Claude Code Sandbox 的公开设计中也明确强调了这两个�
 
 ## 3. 最简单：完全断网
 
-Linux network namespace：
+Linux Network Namespace 创建独立的网络栈。一个刚创建且没有配置 veth、路由或其他外部接口的 namespace，通常无法访问宿主机网络和互联网（loopback 也需要按需配置）。
 
-    Sandbox
-      ↓
-    private network namespace
-      ↓
-    no network
+但 Network Namespace 不是“自动断网开关”：如果运行时给它接入 veth、路由、代理或其他网络接口，它就可以联网。必须检查真实网络拓扑和路由规则。
 
 安全性高，但 Agent 无法：
 
@@ -239,3 +235,21 @@ Agent SSRF：
 ### Q3：为什么 docker.sock 风险很高？
 
 它可能把 Agent 的权限边界直接连接到 Docker daemon，而 daemon 的控制能力远高于普通 workspace。
+
+
+## 13. Domain Allowlist 与 Kernel Network Policy 的区别
+
+- Landlock 的 TCP / UDP 网络权限按端口控制（并受 ABI 版本约束），不是 FQDN / 域名白名单。
+- HTTP(S) Proxy 可以按 CONNECT 主机名 / 端口做策略，但前提是进程流量无法绕过 Proxy。
+- Firewall / Network Namespace 用来阻止 direct socket 或未授权网络路径。
+- DNS 规则还要考虑重绑定、CNAME、redirect、IPv4 / IPv6 和解析后 IP。
+
+仅设置 `HTTP_PROXY` / `HTTPS_PROXY` 环境变量不是强制边界，程序可以忽略它们并直接创建 socket。
+
+## 14. Unix Domain Socket 是独立边界
+
+Network Namespace 主要隔离网络栈，不会自动替你隐藏所有 Unix Domain Socket 路径。像 Docker Socket、SSH Agent Socket、宿主机服务 Socket，应通过 Mount Namespace / 文件系统策略、FD 继承控制和服务端授权一起限制。
+
+## 15. 产品实现要分开核对
+
+例如 Claude Code 的本地 Bash Sandbox 在 Linux / WSL2 使用独立 Network Namespace，并通过本机 Sandbox Proxy 处理允许的域名；macOS 使用 Seatbelt 限制直接连接并允许访问代理。这个实现不能推导成所有 AI Coding 工具都采用相同方案。
