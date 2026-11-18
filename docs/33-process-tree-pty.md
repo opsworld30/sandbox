@@ -240,3 +240,10 @@ PTY 解决终端交互、控制字符和 TTY 语义；它本身不限制文件�
 - Linux cgroup v2：https://docs.kernel.org/admin-guide/cgroup-v2.html
 - Linux process control / signals：https://man7.org/linux/man-pages/man2/kill.2.html
 - Windows Job Objects：https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects
+
+## 本讲实验代码
+
+- [Process Tree 清理](../labs/09-process-tree/README.md)
+- [Resource Limits](../labs/14-resource-limits/README.md)
+
+这些是对应主题的可运行教学实验；实际 OS 隔离能力和模拟策略的区别以各 Lab README 为准。
