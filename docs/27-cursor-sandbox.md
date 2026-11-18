@@ -286,6 +286,6 @@ Cursor 当前 Read Access 的默认模式是 `System`，Agent 不会被强制限
 - Agent 文件读取权限；
 - Auto-review 的审批策略。
 
-不能只开启 Shell Sandbox，就推断 Agent 的所有文件读取都只限于当前 Workspace。
+不能只开启 Shell Sandbox，就推断 Agent 的所有文件读取都只限于当前 Workspace。Read Access 也不适用于 `Run Everything` 模式；该模式会自动执行所有 Tool Call，不走这些读取审批检查。
 
 当前公开的本地 Sandbox 平台选项为 macOS 与 Linux；不要把这套实现直接推断到 Windows。
