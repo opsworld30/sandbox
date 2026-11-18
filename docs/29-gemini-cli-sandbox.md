@@ -2,25 +2,24 @@
 
 ## 1. Gemini CLI 的一个重要设计
 
-Gemini CLI 的公开文档支持多种 Sandbox：
+截至 2026-11-18，Gemini CLI 官方 Sandbox 文档列出的方式包括：
 
     macOS
-      Seatbelt
+      → Seatbelt / sandbox-exec
 
-    Docker
-      Container
+    Docker / Podman
+      → Container
 
-    Podman
-      Container
+    Windows
+      → Windows Native Sandbox
 
-    sandbox-exec
-      macOS
+    Linux
+      → gVisor / runsc
 
-    runsc
-      gVisor
+    Linux
+      → LXC / LXD（Experimental）
 
-    LXC
-      Container
+注意：`sandbox-exec` 是 Gemini CLI 选择 macOS Seatbelt 的配置入口，不是和 Seatbelt 并列的另一种隔离技术。
 
 这再次证明：
 
@@ -28,7 +27,7 @@ Gemini CLI 的公开文档支持多种 Sandbox：
 
 ## 2. Tool-level Sandbox
 
-Gemini CLI 还支持把 Sandbox 放在 Tool 执行层。
+Gemini CLI 文档明确支持 Tool-level sandboxing：对单次工具执行（例如 `shell_exec`、`write_file`）做隔离，而不是把整个 CLI 进程都放进 Sandbox。
 
 例如：
 
@@ -110,7 +109,7 @@ Gemini CLI 还支持把 Sandbox 放在 Tool 执行层。
 
 ## 4. Sandbox Expansion
 
-Gemini CLI 的公开设计还包含：
+Gemini CLI 当前文档明确提供 Sandbox Expansion：
 
     sandboxed command
         ↓
@@ -120,7 +119,7 @@ Gemini CLI 的公开设计还包含：
         ↓
     user approval
         ↓
-    retry with expanded capability
+    run this command with expanded capability
 
 这是一个非常好的 UX：
 
@@ -154,6 +153,8 @@ Agent：
 
     network:
       *
+
+扩展通常针对本次命令执行，不应自动理解成把 Session 的长期基础策略永久放宽。
 
 ## 6. 这其实是 Capability Expansion
 
@@ -208,3 +209,24 @@ Agent：
 
 Gemini CLI Sandbox:
 https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/sandbox.md
+
+
+## 9. Windows Native Sandbox 的边界
+
+Gemini CLI 的 Windows Native Sandbox 使用 Windows Mandatory Integrity Control 的 Low Mandatory Level，并通过 `icacls` 设置相关文件 / 目录的完整性级别。官方文档提醒这些完整性级别变化可能留在文件系统中，Sandbox 会话结束后不一定自动恢复。
+
+这与 Codex 的 restricted token + ACL + Windows Firewall 设计不同，也与 Anthropic sandbox-runtime 的 WFP + dedicated local user Alpha 实现不同。不要把它们统称成一个“Windows Sandbox 方案”。
+
+## 10. 默认配置不等于默认断网
+
+Gemini CLI 的 macOS 默认 Seatbelt profile（例如 permissive-open）会限制项目目录外写入，但仍允许较广泛的读取和网络访问。具体权限取决于所选 profile 和 Sandbox provider，不能只看到 `-s` 就认为网络默认 deny。
+
+## 11. 参考
+
+Gemini CLI Sandbox:
+https://geminicli.com/docs/cli/sandbox/
+
+GitHub source:
+https://github.com/google-gemini/gemini-cli
+
+**核验日期：2026-11-18。** Windows Native、LXC/LXD 等支持状态和配置名称应以当前官方文档为准。
