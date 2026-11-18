@@ -41,19 +41,23 @@ Agent 不会直接执行一句固定命令，而是不断产生：
 
 ## 2. Codex 为什么不是简单 Docker
 
-公开的 Codex 安全资料显示，本地 Codex 会根据平台使用不同 Sandbox：
+截至 2026-11-18，Codex 官方 Sandbox 文档对本地执行环境的描述是：
 
     macOS
       → Seatbelt
 
-    Linux
-      → seccomp + Landlock
+    Linux / WSL2
+      → bubblewrap（bwrap）Linux sandbox
 
-    Windows
-      → 原生 Windows sandbox implementation
-      → 或 WSL/Linux sandbox 路径
+    Windows PowerShell
+      → native Windows sandbox
 
-而云端 Codex 则运行在隔离的容器环境中。
+    Windows WSL2
+      → Linux sandbox implementation
+
+注意：不要把 Codex 当前 Linux 实现概括成 Landlock + seccomp。公开文档描述的主路径是 bwrap；Codex 的不同版本、不同平台和不同执行面可能有实现差异。
+
+Codex Cloud 是远程执行环境，不能把它和本地 Codex 的 OS Sandbox 当成同一个 Backend。
 
 这说明一个重要事实：
 
@@ -225,9 +229,9 @@ Agent：
     │ macOS         │
     │ Seatbelt      │
     ├───────────────┤
-    │ Linux         │
-    │ Landlock      │
-    │ seccomp       │
+    │ Linux / WSL2  │
+    │ bubblewrap    │
+    │ + seccomp*    │
     ├───────────────┤
     │ Windows       │
     │ native        │
@@ -259,13 +263,34 @@ Agent：
 
 > Runtime abstraction 为什么比“调用 Docker”更重要。
 
-## 10. 参考
+## 10. Windows 实现值得单独研究什么
+
+OpenAI 2026 年公开的 Windows 工程文章描述了 Codex Windows Sandbox 的设计演进：
+
+- AppContainer 对固定能力应用有价值，但对任意 shell / Git / Python / Node / build tool 这类开放式开发工作流不够合适；
+- 早期 unelevated prototype 使用 synthetic SID、ACL 和 restricted token，但网络限制主要依赖环境变量，作者明确指出这属于 advisory，不能抵御直接 socket；
+- 当前文章描述的 elevated design 使用专门的 Sandbox 用户、restricted token、ACL、Windows Firewall 规则，以及独立 setup / command-runner 进程。
+
+不要把这篇文章的 Windows 实现简化成“只用 ACL”或“只用 WFP”。
+
+## 11. 参考
 
 OpenAI Codex sandboxing:
 https://github.com/openai/codex/tree/main/codex-rs/sandboxing
 
-OpenAI Codex security:
-https://developers.openai.com/codex/security
+Codex Sandbox docs:
+https://developers.openai.com/codex/concepts/sandboxing
 
-OpenAI Codex Windows sandbox:
+Codex Agent approvals & security:
+https://learn.chatgpt.com/docs/agent-approvals-security
+
+OpenAI Codex Windows sandbox engineering:
 https://openai.com/index/building-codex-windows-sandbox/
+
+**核验日期：2026-11-18。** Codex 的本地 Sandbox 会随版本更新；产品内部实现以当前官方文档和对应版本源码为准。
+
+
+## 12. 需要避免的两个误解
+
+1. Permission / Approval 和 Sandbox 是两层控制。批准某次操作，不等于 Sandbox 已自动扩大；是否允许在 Sandbox 外执行，取决于当前模式、规则和用户审批。
+2. 不同 Codex surface（CLI、IDE、Desktop、Cloud、Agents API）不是同一套部署环境。讨论实现时必须先说清楚具体是哪一个产品面和执行位置。
