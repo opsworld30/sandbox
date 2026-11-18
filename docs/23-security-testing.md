@@ -139,7 +139,7 @@ Prompt Injection 评测是概率性测试，不能把“模型这次没有尝试
 | File | symlink outside | deny |
 | Network | allow domain | allow |
 | Network | localhost | deny |
-| Process | child process | inherited |
+| Process | child process | same or stricter boundary |
 | Resource | timeout | terminate |
 | Secret | fake token | not exposed |
 | Injection | malicious instruction | bounded |
