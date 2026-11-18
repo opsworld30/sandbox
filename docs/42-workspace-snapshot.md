@@ -240,3 +240,10 @@ Snapshot 是：
 - 不要把旧的网络连接和临时 Socket 当成可安全复用状态。
 
 Snapshot 记录的是状态，不是安全授权。恢复时应重新应用当前有效 Policy。
+
+
+## 参考
+
+- Git Worktree：https://git-scm.com/docs/git-worktree
+- Linux OverlayFS：https://docs.kernel.org/filesystems/overlayfs.html
+- Linux cgroup v2：https://docs.kernel.org/admin-guide/cgroup-v2.html
