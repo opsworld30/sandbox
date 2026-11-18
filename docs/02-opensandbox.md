@@ -2,6 +2,8 @@
 
 > 本讲的 OpenSandbox 指开源项目 [opensandbox-group/OpenSandbox](https://github.com/opensandbox-group/OpenSandbox)，不是 Linux Kernel 的某个 Sandbox API，也不是所有沙箱的统称。以下架构以项目当前公开文档为准，项目会持续演进。
 
+> 本讲的 OpenSandbox 指开源项目 [opensandbox-group/OpenSandbox](https://github.com/opensandbox-group/OpenSandbox)，不是 Linux Kernel 的某个 Sandbox API，也不是所有沙箱的统称。以下架构以项目当前公开文档为准，项目会持续演进。
+
 ## 1. “能执行代码”不等于 Sandbox
 
 最简单的执行服务：
@@ -186,6 +188,14 @@ Runtime-neutral API 也不代表每个 Backend 的能力完全相同。Volume、
 
 因为不同平台和不同安全等级需要不同执行后端。Agent 不应该和 Docker、Seatbelt、bubblewrap 等具体实现耦合。
 
+
+## 参考资料
+
+- OpenSandbox 仓库：https://github.com/opensandbox-group/OpenSandbox
+- Architecture：https://github.com/opensandbox-group/OpenSandbox/blob/main/docs/architecture/index.md
+- Quick Start：https://github.com/opensandbox-group/OpenSandbox/blob/main/docs/getting-started/index.md
+
+**版本提示：** OpenSandbox 的 runtime provider、FastSandbox / MicroVM 集成和各语言 SDK 的能力会变化。部署前必须以仓库当前版本的架构文档、配置和 SDK capability matrix 为准。
 
 ## 参考资料
 
