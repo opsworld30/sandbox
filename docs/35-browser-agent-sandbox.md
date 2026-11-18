@@ -169,3 +169,27 @@ Browser Sandbox 是：
 不是简单：
 
     “浏览器放进 Docker”。
+
+
+## 9. Browser 的三个边界要分开
+
+1. **Browser Engine Sandbox**：Chromium / browser process 自身的 renderer / utility process 隔离。
+2. **Browser Profile Isolation**：Cookie、LocalStorage、登录态、下载目录和扩展配置是否与用户真实 Profile 分开。
+3. **Agent Runtime Sandbox**：Browser Tool 进程或远程 Browser Service 能访问哪些文件、网络和凭证。
+
+浏览器引擎有自己的 Sandbox，不代表 Agent 的文件和网络策略已经正确；使用独立 Profile，也不代表 Browser 能访问的站点已经受到网络 allowlist 限制。
+
+## 10. Browser 可能是远程服务
+
+有些 Agent 的 Browser Tool 运行在远程 Browser Service，而不是本机 Chrome 进程。此时本地 Shell Sandbox 不会自动约束远程 Browser；文件下载、浏览器凭证、网络 egress 和日志都必须在 Browser Service 所在环境实施控制。
+
+## 11. 浏览器访问 localhost 的风险
+
+Browser Tool 与 Shell Tool 可能使用不同网络路径。即使 Shell Sandbox 禁止访问本机网络，也不能推断 Browser 一定被同一策略限制。必须分别测试：
+
+- 127.0.0.1 / ::1；
+- RFC1918 私有 IPv4；
+- IPv6 ULA / link-local；
+- 重定向后的目标；
+- DNS 解析后 IP；
+- 下载和上传路径。
