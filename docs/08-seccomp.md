@@ -499,3 +499,9 @@ seccomp 可以检查 syscall 参数中的数值，但不能直接检查 `openat`
 - Seccomp filter：https://www.kernel.org/doc/html/latest/userspace-api/seccomp_filter.html
 - seccomp(2)：https://man7.org/linux/man-pages/man2/seccomp.2.html
 - libseccomp：https://github.com/seccomp/libseccomp
+
+## 本讲实验代码
+
+- [libseccomp C 实验](../labs/01-seccomp/README.md)
+
+这些是对应主题的可运行教学实验；具体操作系统要求和安全边界以各 Lab README 为准。
