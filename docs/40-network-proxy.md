@@ -314,3 +314,10 @@ Gateway 可以记录：
 
 - HTTP Semantics — CONNECT method (RFC 9110 §9.3.6)：https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.6
 - Linux Network Namespaces：https://man7.org/linux/man-pages/man7/network_namespaces.7.html
+
+## 本讲实验代码
+
+- [Network Namespace](../labs/04-bubblewrap/README.md)
+- [Domain Allowlist](../labs/06-network-policy/README.md)
+
+这些是对应主题的可运行教学实验；实际 OS 隔离能力和模拟策略的区别以各 Lab README 为准。
