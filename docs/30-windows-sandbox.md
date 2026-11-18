@@ -198,7 +198,7 @@ Windows Native Sandbox 使用 Low Mandatory Level（MIC），并用 `icacls` 设
 
 独立的 `@anthropic-ai/sandbox-runtime` 仓库整体标注为 Beta Research Preview；其中 Windows 默认 `srt-win` Backend 标注为 Alpha， 使用专用 `srt-sandbox` 本地用户、Windows Filtering Platform（WFP）出站过滤、write-restricted token、Job Object 和文件系统 ACE。
 
-当前项目还提供可选的 **实验性** `mxc` Backend：在支持的 Windows BaseContainer 环境中通过 `@microsoft/mxc-sdk` 执行，不使用 `srt-sandbox` 用户和 ACL 安装流程。它需要 Node.js 24+ 与可用的 MXC SDK；MXC 的 AppContainer tiers 不在此 Backend 使用。若 Host 不支持所需策略，会返回 `backend_unsupported`，不会自动回退到 `srt-win`。两种 Backend 不能混为一谈。
+当前项目还提供可选的 **实验性** `mxc` Backend：在支持的 Windows BaseContainer 环境中通过 `@microsoft/mxc-sdk` 执行，不使用 `srt-sandbox` 用户和 ACL 安装流程。它需要 Node.js 24+ 与可用的 MXC SDK；MXC 的 AppContainer tiers 不在此 Backend 使用。若 Host 不支持所需策略，会返回 `backend_unsupported`，不会自动回退到 `srt-win`。当前已知兼容性限制包括 MSYS2 程序无法启动（例如 Git Bash 的 `bash.exe` / `sh.exe` 和 Git for Windows 的 Unix 工具）；原生 `git.exe` 可用，建议使用 cmd 或 PowerShell。两种 Backend 不能混为一谈。
 
 这不是 Claude Code Native Windows Bash Sandbox；Claude Code 产品本身的本地 Bash Sandbox 文档仍要求 Windows 用户使用 WSL2 或容器环境。
 
@@ -250,3 +250,8 @@ Anthropic sandbox-runtime 的 Windows Alpha `srt-win` Backend 文档明确列出
 - 在多人共用的 Windows 主机上，应使用 `--skip-profile-grant` / `skipProfileGrant: true`，或撤销已有 Profile grant；不要把单用户开发机的默认安装假设套到共享主机。
 
 因此，`srt-win` 的专用用户并不等于“每个租户拥有独立 Sandbox 用户”。共享主机需要额外验证本地用户之间的读写隔离、持久 ACL grant 和代理身份。
+
+
+## 15. 网络能力要按协议核对
+
+Anthropic sandbox-runtime 的网络代理路径包括 HTTP / HTTPS Proxy，以及通过 SOCKS5 Proxy 中介的其他 TCP 流量。不要只因为配置了 hostname allowlist，就假设所有 UDP、QUIC、任意协议或远程服务流量都能被同一套 Proxy 规则检查；应按具体 Backend 和协议做实际测试。
