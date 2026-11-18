@@ -266,3 +266,41 @@ https://code.claude.com/docs/en/claude-code-on-the-web
 Claude Code Linux / WSL2 Sandbox 会把命令放入独立 Network Namespace，并通过本机 Sandbox Proxy 处理允许的域名。能否联网取决于工具是否遵守 Proxy 环境变量；直接 SSH、UDP / QUIC、ICMP 等流量不等于自动获得允许。macOS 则通过 Seatbelt 阻止除代理路径外的直接网络连接。
 
 因此 Proxy 的 allowlist 和 OS-level network enforcement 必须组合；单独注入 `HTTP_PROXY` 环境变量不是安全边界。
+
+
+## 12. Claude Code Sandbox 的默认开关和失败回退必须讲清
+
+截至 2026-11-18，Claude Code 本地 Bash Sandbox：
+
+- 默认关闭，需要在会话中启用或通过设置开启；
+- 如果平台不支持或依赖检查失败，默认可能回退到无 Sandbox 的命令执行；
+- 命令在 Sandbox 内失败后，Claude 可能申请使用 `dangerouslyDisableSandbox` 在 Sandbox 外重试；
+- 可以设置 `sandbox.failIfUnavailable = true`，在 Sandbox 无法启动时拒绝启动 / 执行；
+- 可以设置 `sandbox.allowUnsandboxedCommands = false`，关闭 Sandbox 外重试；
+- `excludedCommands` 和用户自己在 shell-mode 输入的命令也需要单独审查。
+
+严格部署通常要同时考虑：
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false
+  }
+}
+```
+
+还要注意：这并不自动保护 File tools、MCP、hooks、LSP、plugin monitors、helper commands。若要把这些组件也放进同一边界，需要把 Claude Code 整体运行在 Container、VM 或独立 sandbox-runtime 内。
+
+## 13. 环境变量和凭证默认不是“自动消失”
+
+Claude Code 官方文档指出，Sandboxed Bash 默认继承 Claude Code 的环境变量，其中可能包含 Secret。需要通过 `credentials`、环境变量清理和凭证文件 mask 等配置减少暴露；不要假设“Bash 已 Sandbox”就代表 Token 不可见。
+
+## 14. Proxy 的域名过滤也有边界
+
+本地 Sandbox Proxy 根据连接目标的 hostname 做 allow / deny 判断，但普通 HTTPS CONNECT 不会解密 TLS 内容。允许某个大域名可能形成数据外传路径；若威胁模型要求更强控制，需要考虑 TLS interception / 自定义 Proxy、证书管理和更窄的域名规则。
+
+参考：
+- https://code.claude.com/docs/en/sandboxing
+- https://code.claude.com/docs/en/security
